@@ -1,0 +1,364 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                               BigInt                  @id @default(autoincrement())
+  userName                         String                  @db.VarChar(100)
+  fullName                         String                  @db.VarChar(100)
+  email                            String                  @unique @db.VarChar(100)
+  password                         String                  @db.VarChar(100)
+  phoneNumber                      String                  @db.Char(14)
+  address                          String                  @db.VarChar(100)
+  role                             Role
+  createAt                         DateTime                @default(now())
+  createBy                         BigInt?
+  updatedAt                        DateTime                @default(now())
+  updatedBy                        BigInt?
+  createdByRel                     User?                   @relation("selfCreatedByRel", fields: [createBy], references: [id])
+  selfCreatedByRel                 User[]                  @relation("selfCreatedByRel")
+  updatedByRel                     User?                   @relation("selfUpdatedByRel", fields: [updatedBy], references: [id])
+  selfUpdatedByRel                 User[]                  @relation("selfUpdatedByRel")
+  churchIncomeCreateByRel          ChurchIncome[]          @relation("churchIncomeCreateByRel")
+  churchIncomeUpdateByRel          ChurchIncome[]          @relation("churchIncomeUpdateByRel")
+  churchIncomeTypeCreateByRel      ChurchIncomeType[]      @relation("churchIncomeTypeCreateByRel")
+  churchIncomeTypeUpdateByRel      ChurchIncomeType[]      @relation("churchIncomeTypeUpdateByRel")
+  churchSpendingCreateByRel        ChurchSpending[]        @relation("churchSpendingCreateByRel")
+  churchSpendingUpdateByRel        ChurchSpending[]        @relation("churchSpendingUpdateByRel")
+  churchSpendingTypeCreateByRel    ChurchSpendingType[]    @relation("churchSpendingTypeCreateByRel")
+  churchSpendingTypeUpdateByRel    ChurchSpendingType[]    @relation("churchSpendingTypeUpdateByRel")
+  storeIncomeCreateByRel           StoreIncome[]           @relation("storeIncomeCreateByRel")
+  storeIncomeUpdateByRel           StoreIncome[]           @relation("storeIncomeUpdateByRel")
+  storeIncomeTypeCreateByRel       StoreIncomeType[]       @relation("storeIncomeTypeCreateByRel")
+  storeIncomeTypeUpdateByRel       StoreIncomeType[]       @relation("storeIncomeTypeUpdateByRel")
+  storeSpendingCreateByRel         StoreSpending[]         @relation("storeSpendingCreateByRel")
+  storeSpendingUpdateByRel         StoreSpending[]         @relation("storeSpendingUpdateByRel")
+  storeSpendingTypeCreateByRel     StoreSpendingType[]     @relation("storeSpendingTypeCreateByRel")
+  storeSpendingTypeUpdateByRel     StoreSpendingType[]     @relation("storeSpendingTypeUpdateByRel")
+  farmIncomeCreateByRel            FarmIncome[]            @relation("farmIncomeCreateByRel")
+  farmIncomeUpdateByRel            FarmIncome[]            @relation("farmIncomeUpdateByRel")
+  farmIncomeTypeCreateByRel        FarmIncomeType[]        @relation("farmIncomeTypeCreateByRel")
+  farmIncomeTypeUpdateByRel        FarmIncomeType[]        @relation("farmIncomeTypeUpdateByRel")
+  farmSpendingCreateByRel          FarmSpending[]          @relation("farmSpendingCreateByRel")
+  farmSpendingUpdateByRel          FarmSpending[]          @relation("farmSpendingUpdateByRel")
+  farmSpendingTypeCreateByRel      FarmSpendingType[]      @relation("farmSpendingTypeCreateByRel")
+  farmSpendingTypeUpdateByRel      FarmSpendingType[]      @relation("farmSpendingTypeUpdateByRel")
+  userHistoryCreatedByRel          UserHistory[]           @relation("userHistoryCreatedByRel")
+  userHistoryUpdatedByRel          UserHistory[]           @relation("userHistoryUpdatedByRel")
+  userHistoryIdRel                 UserHistory[]           @relation("userHistoryIdRel")
+  churchIncomeHistoryCreateByRel   ChurchIncomeHistory[]   @relation("churchIncomeHistoryCreateByRel")
+  churchIncomeHistoryUpdateByRel   ChurchIncomeHistory[]   @relation("churchIncomeHistoryUpdateByRel")
+  churchSpendingHistoryCreateByRel ChurchSpendingHistory[] @relation("churchSpendingHistoryCreateByRel")
+  churchSpendingHistoryUpdateByRel ChurchSpendingHistory[] @relation("churchSpendingHistoryUpdateByRel")
+  storeIncomeHistoryCreateByRel    StoreIncomeHistory[]    @relation("storeIncomeHistoryCreateByRel")
+  storeIncomeHistoryUpdateByRel    StoreIncomeHistory[]    @relation("storeIncomeHistoryUpdateByRel")
+  storeSpendingHistoryCreateByRel  StoreSpendingHistory[]  @relation("storeSpendingHistoryCreateByRel")
+  storeSpendingHistoryUpdateByRel  StoreSpendingHistory[]  @relation("storeSpendingHistoryUpdateByRel")
+  farmIncomeHistoryCreateByRel     FarmIncomeHistory[]     @relation("farmIncomeHistoryCreateByRel")
+  farmIncomeHistoryUpdateByRel     FarmIncomeHistory[]     @relation("farmIncomeHistoryUpdateByRel")
+  farmSpendingHistoryCreateByRel   FarmSpendingHistory[]   @relation("farmSpendingHistoryCreateByRel")
+  farmSpendingHistoryUpdateByRel   FarmSpendingHistory[]   @relation("farmSpendingHistoryUpdateByRel")
+}
+
+model UserHistory {
+  id                      BigInt   @id @default(autoincrement())
+  userId                  BigInt
+  createdAt               DateTime @default(now())
+  createdBy               BigInt?
+  updatedAt               DateTime @default(now())
+  updatedBy               BigInt?
+  deleted                 Boolean  @default(false)
+  oldData                 Json
+  newData                 Json
+  userHistoryCreatedByRel User?    @relation("userHistoryCreatedByRel", fields: [createdBy], references: [id])
+  userHistoryUpdatedByRel User?    @relation("userHistoryUpdatedByRel", fields: [updatedBy], references: [id])
+  userHistoryIdRel        User     @relation("userHistoryIdRel", fields: [userId], references: [id])
+}
+
+model ChurchIncome {
+  id                      BigInt           @id @default(autoincrement())
+  incomeTypeId            BigInt
+  detail                  String           @db.Text
+  funds                   BigInt
+  churchIncomeTypeIdRel   ChurchIncomeType @relation("churchIncomeTypeIdRel", fields: [incomeTypeId], references: [id])
+  createAt                DateTime         @default(now())
+  createBy                BigInt?
+  churchIncomeCreateByRel User?            @relation("churchIncomeCreateByRel", fields: [createBy], references: [id])
+  updatedAt               DateTime         @default(now())
+  updatedBy               BigInt?
+  churchIncomeUpdateByRel User?            @relation("churchIncomeUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model ChurchIncomeHistory {
+  revId                          BigInt           @id @default(autoincrement())
+  id                             BigInt
+  incomeTypeId                   BigInt
+  detail                         String           @db.Text
+  funds                          BigInt
+  churchIncomeTypeHistoryIdRel   ChurchIncomeType @relation("churchIncomeTypeHistoryIdRel", fields: [incomeTypeId], references: [id])
+  createAt                       DateTime         @default(now())
+  createBy                       BigInt?
+  churchIncomeHistoryCreateByRel User?            @relation("churchIncomeHistoryCreateByRel", fields: [createBy], references: [id])
+  updatedAt                      DateTime         @default(now())
+  updatedBy                      BigInt?
+  churchIncomeHistoryUpdateByRel User?            @relation("churchIncomeHistoryUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model ChurchIncomeType {
+  id                           BigInt                @id @default(autoincrement())
+  incomeTypeName               String                @db.VarChar(100)
+  code                         String                @db.VarChar(100)
+  description                  String                @db.Text
+  createAt                     DateTime              @default(now())
+  createBy                     BigInt?
+  churchIncomeTypeCreateByRel  User?                 @relation("churchIncomeTypeCreateByRel", fields: [createBy], references: [id])
+  updatedAt                    DateTime              @default(now())
+  updatedBy                    BigInt?
+  churchIncomeTypeUpdateByRel  User?                 @relation("churchIncomeTypeUpdateByRel", fields: [updatedBy], references: [id])
+  churchIncomeTypeIdRel        ChurchIncome[]        @relation("churchIncomeTypeIdRel")
+  churchIncomeTypeHistoryIdRel ChurchIncomeHistory[] @relation("churchIncomeTypeHistoryIdRel")
+}
+
+model ChurchSpending {
+  id                        BigInt             @id @default(autoincrement())
+  spendingTypeId            BigInt
+  detail                    String             @db.Text
+  funds                     BigInt
+  bill                      String             @db.VarChar(200)
+  billNumber                String             @db.VarChar(100)
+  churchSpendingTypeIdRel   ChurchSpendingType @relation("churchSpendingTypeIdRel", fields: [spendingTypeId], references: [id])
+  createAt                  DateTime           @default(now())
+  createBy                  BigInt?
+  churchSpendingCreateByRel User?              @relation("churchSpendingCreateByRel", fields: [createBy], references: [id])
+  updatedAt                 DateTime           @default(now())
+  updatedBy                 BigInt?
+  churchSpendingUpdateByRel User?              @relation("churchSpendingUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model ChurchSpendingHistory {
+  revId                            BigInt             @id @default(autoincrement())
+  id                               BigInt
+  spendingTypeId                   BigInt
+  detail                           String             @db.Text
+  funds                            BigInt
+  bill                             String             @db.VarChar(200)
+  billNumber                       String             @db.VarChar(100)
+  churchSpendingTypeHistoryIdRel   ChurchSpendingType @relation("churchSpendingHistoryTypeIdRel", fields: [spendingTypeId], references: [id])
+  createAt                         DateTime           @default(now())
+  createBy                         BigInt?
+  churchSpendingHistoryCreateByRel User?              @relation("churchSpendingHistoryCreateByRel", fields: [createBy], references: [id])
+  updatedAt                        DateTime           @default(now())
+  updatedBy                        BigInt?
+  churchSpendingHistoryUpdateByRel User?              @relation("churchSpendingHistoryUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model ChurchSpendingType {
+  id                             BigInt                  @id @default(autoincrement())
+  spendingTypeName               String                  @db.VarChar(100)
+  code                           String                  @db.VarChar(100)
+  description                    String                  @db.Text
+  createAt                       DateTime                @default(now())
+  createBy                       BigInt?
+  churchSpendingTypeCreateByRel  User?                   @relation("churchSpendingTypeCreateByRel", fields: [createBy], references: [id])
+  updatedAt                      DateTime                @default(now())
+  updatedBy                      BigInt?
+  churchSpendingTypeUpdateByRel  User?                   @relation("churchSpendingTypeUpdateByRel", fields: [updatedBy], references: [id])
+  churchSpendingTypeIdRel        ChurchSpending[]        @relation("churchSpendingTypeIdRel")
+  churchSpendingTypeHistoryIdRel ChurchSpendingHistory[] @relation("churchSpendingHistoryTypeIdRel")
+}
+
+model StoreIncome {
+  id                     BigInt          @id @default(autoincrement())
+  incomeTypeId           BigInt
+  detail                 String          @db.Text
+  funds                  BigInt
+  storeIncomeTypeIdRel   StoreIncomeType @relation("storeIncomeTypeIdRel", fields: [incomeTypeId], references: [id])
+  createAt               DateTime        @default(now())
+  createBy               BigInt?
+  storeIncomeCreateByRel User?           @relation("storeIncomeCreateByRel", fields: [createBy], references: [id])
+  updatedAt              DateTime        @default(now())
+  updatedBy              BigInt?
+  storeIncomeUpdateByRel User?           @relation("storeIncomeUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model StoreIncomeHistory {
+  revId                         BigInt          @id @default(autoincrement())
+  id                            BigInt
+  incomeTypeId                  BigInt
+  detail                        String          @db.Text
+  funds                         BigInt
+  storeIncomeTypeHistoryIdRel   StoreIncomeType @relation("storeIncomeTypeHistoryIdRel", fields: [incomeTypeId], references: [id])
+  createAt                      DateTime        @default(now())
+  createBy                      BigInt?
+  storeIncomeHistoryCreateByRel User?           @relation("storeIncomeHistoryCreateByRel", fields: [createBy], references: [id])
+  updatedAt                     DateTime        @default(now())
+  updatedBy                     BigInt?
+  storeIncomeHistoryUpdateByRel User?           @relation("storeIncomeHistoryUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model StoreIncomeType {
+  id                          BigInt               @id @default(autoincrement())
+  incomeTypeName              String               @db.VarChar(100)
+  code                        String               @db.VarChar(100)
+  description                 String               @db.Text
+  createAt                    DateTime             @default(now())
+  createBy                    BigInt?
+  storeIncomeTypeCreateByRel  User?                @relation("storeIncomeTypeCreateByRel", fields: [createBy], references: [id])
+  updatedAt                   DateTime             @default(now())
+  updatedBy                   BigInt?
+  storeIncomeTypeUpdateByRel  User?                @relation("storeIncomeTypeUpdateByRel", fields: [updatedBy], references: [id])
+  storeIncomeTypeIdRel        StoreIncome[]        @relation("storeIncomeTypeIdRel")
+  storeIncomeTypeHistoryIdRel StoreIncomeHistory[] @relation("storeIncomeTypeHistoryIdRel")
+}
+
+model StoreSpending {
+  id                       BigInt            @id @default(autoincrement())
+  spendingTypeId           BigInt
+  detail                   String            @db.Text
+  funds                    BigInt
+  storeSpendingTypeIdRel   StoreSpendingType @relation("storeSpendingTypeIdRel", fields: [spendingTypeId], references: [id])
+  createAt                 DateTime          @default(now())
+  createBy                 BigInt?
+  storeSpendingCreateByRel User?             @relation("storeSpendingCreateByRel", fields: [createBy], references: [id])
+  updatedAt                DateTime          @default(now())
+  updatedBy                BigInt?
+  storeSpendingUpdateByRel User?             @relation("storeSpendingUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model StoreSpendingHistory {
+  revId                           BigInt            @id @default(autoincrement())
+  id                              BigInt
+  spendingTypeId                  BigInt
+  detail                          String            @db.Text
+  funds                           BigInt
+  storeSpendingTypeHistoryIdRel   StoreSpendingType @relation("storeSpendingTypeHistoryIdRel", fields: [spendingTypeId], references: [id])
+  createAt                        DateTime          @default(now())
+  createBy                        BigInt?
+  storeSpendingHistoryCreateByRel User?             @relation("storeSpendingHistoryCreateByRel", fields: [createBy], references: [id])
+  updatedAt                       DateTime          @default(now())
+  updatedBy                       BigInt?
+  storeSpendingHistoryUpdateByRel User?             @relation("storeSpendingHistoryUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model StoreSpendingType {
+  id                            BigInt                 @id @default(autoincrement())
+  spendingTypeName              String                 @db.VarChar(100)
+  code                          String                 @db.VarChar(100)
+  description                   String                 @db.Text
+  createAt                      DateTime               @default(now())
+  createBy                      BigInt?
+  storeSpendingTypeCreateByRel  User?                  @relation("storeSpendingTypeCreateByRel", fields: [createBy], references: [id])
+  updatedAt                     DateTime               @default(now())
+  updatedBy                     BigInt?
+  storeSpendingTypeUpdateByRel  User?                  @relation("storeSpendingTypeUpdateByRel", fields: [updatedBy], references: [id])
+  storeSpendingTypeIdRel        StoreSpending[]        @relation("storeSpendingTypeIdRel")
+  storeSpendingTypeHistoryIdRel StoreSpendingHistory[] @relation("storeSpendingTypeHistoryIdRel")
+}
+
+model FarmIncome {
+  id                    BigInt         @id @default(autoincrement())
+  incomeTypeId          BigInt
+  detail                String         @db.Text
+  amount                BigInt         @default(1)
+  price                 BigInt
+  farmIncomeTypeIdRel   FarmIncomeType @relation("farmIncomeTypeIdRel", fields: [incomeTypeId], references: [id])
+  createAt              DateTime       @default(now())
+  createBy              BigInt?
+  farmIncomeCreateByRel User?          @relation("farmIncomeCreateByRel", fields: [createBy], references: [id])
+  updatedAt             DateTime       @default(now())
+  updatedBy             BigInt?
+  farmIncomeUpdateByRel User?          @relation("farmIncomeUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model FarmIncomeHistory {
+  revId                        BigInt         @id @default(autoincrement())
+  id                           BigInt
+  incomeTypeId                 BigInt
+  detail                       String         @db.Text
+  amount                       BigInt         @default(1)
+  price                        BigInt
+  farmIncomeTypeHistoryIdRel   FarmIncomeType @relation("farmIncomeTypeHistoryIdRel", fields: [incomeTypeId], references: [id])
+  createAt                     DateTime       @default(now())
+  createBy                     BigInt?
+  farmIncomeHistoryCreateByRel User?          @relation("farmIncomeHistoryCreateByRel", fields: [createBy], references: [id])
+  updatedAt                    DateTime       @default(now())
+  updatedBy                    BigInt?
+  farmIncomeHistoryUpdateByRel User?          @relation("farmIncomeHistoryUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model FarmIncomeType {
+  id                         BigInt              @id @default(autoincrement())
+  incomeTypeName             String              @db.VarChar(100)
+  code                       String              @db.VarChar(100)
+  description                String              @db.Text
+  createAt                   DateTime            @default(now())
+  createBy                   BigInt?
+  farmIncomeTypeCreateByRel  User?               @relation("farmIncomeTypeCreateByRel", fields: [createBy], references: [id])
+  updatedAt                  DateTime            @default(now())
+  updatedBy                  BigInt?
+  farmIncomeTypeUpdateByRel  User?               @relation("farmIncomeTypeUpdateByRel", fields: [updatedBy], references: [id])
+  farmIncomeTypeIdRel        FarmIncome[]        @relation("farmIncomeTypeIdRel")
+  farmIncomeTypeHistoryIdRel FarmIncomeHistory[] @relation("farmIncomeTypeHistoryIdRel")
+}
+
+model FarmSpending {
+  id                      BigInt           @id @default(autoincrement())
+  spendingTypeId          BigInt
+  detail                  String           @db.Text
+  funds                   BigInt
+  farmSpendingTypeIdRel   FarmSpendingType @relation("farmSpendingTypeIdRel", fields: [spendingTypeId], references: [id])
+  createAt                DateTime         @default(now())
+  createBy                BigInt?
+  farmSpendingCreateByRel User?            @relation("farmSpendingCreateByRel", fields: [createBy], references: [id])
+  updatedAt               DateTime         @default(now())
+  updatedBy               BigInt?
+  farmSpendingUpdateByRel User?            @relation("farmSpendingUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model FarmSpendingHistory {
+  revId                          BigInt           @id @default(autoincrement())
+  id                             BigInt
+  spendingTypeId                 BigInt
+  detail                         String           @db.Text
+  funds                          BigInt
+  farmSpendingTypeHistoryIdRel   FarmSpendingType @relation("farmSpendingTypeHistoryIdRel", fields: [spendingTypeId], references: [id])
+  createAt                       DateTime         @default(now())
+  createBy                       BigInt?
+  farmSpendingHistoryCreateByRel User?            @relation("farmSpendingHistoryCreateByRel", fields: [createBy], references: [id])
+  updatedAt                      DateTime         @default(now())
+  updatedBy                      BigInt?
+  farmSpendingHistoryUpdateByRel User?            @relation("farmSpendingHistoryUpdateByRel", fields: [updatedBy], references: [id])
+}
+
+model FarmSpendingType {
+  id                           BigInt                @id @default(autoincrement())
+  spendingTypeName             String                @db.VarChar(100)
+  code                         String                @db.VarChar(100)
+  description                  String                @db.Text
+  createAt                     DateTime              @default(now())
+  createBy                     BigInt?
+  farmSpendingTypeCreateByRel  User?                 @relation("farmSpendingTypeCreateByRel", fields: [createBy], references: [id])
+  updatedAt                    DateTime              @default(now())
+  updatedBy                    BigInt?
+  farmSpendingTypeUpdateByRel  User?                 @relation("farmSpendingTypeUpdateByRel", fields: [updatedBy], references: [id])
+  farmSpendingTypeIdRel        FarmSpending[]        @relation("farmSpendingTypeIdRel")
+  farmSpendingTypeHistoryIdRel FarmSpendingHistory[] @relation("farmSpendingTypeHistoryIdRel")
+}
+
+enum Role {
+  ADMIN
+  CHURCH
+  STORE
+  FARM
+}
