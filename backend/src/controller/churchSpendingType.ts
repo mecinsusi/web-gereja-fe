@@ -4,7 +4,7 @@ import {
   updateChurchSpendingTypeService,
   deleteChurchSpendingTypeService,
   getChurchSpendingTypeService,
-  getAllChurchSpendingTypeService
+  getAllChurchSpendingTypeService,
 } from "../service/churchSpendingType";
 
 import { body, param, validationResult } from "express-validator";
@@ -15,9 +15,7 @@ export const churchSpendingTypeRouter = Router();
 
 churchSpendingTypeRouter.post(
   "/create",
-  body("detail").isString().trim(),
-  body("funds").isInt(),
-  body("spendingTypeTypeName").isString().trim(),
+  body("spendingTypeName").isString().trim(),
   body("description").isString().trim(),
   body("code").isString().trim(),
   async (req: Request, res: any) => {
@@ -46,8 +44,6 @@ churchSpendingTypeRouter.post(
 churchSpendingTypeRouter.put(
   "/update/:id",
   param("id").isNumeric().trim(),
-  body("detail").isString().trim(),
-  body("funds").isInt(),
   body("spendingTypeTypeName").isString().trim(),
   body("description").isString().trim(),
   body("code").isString().trim(),
@@ -75,7 +71,6 @@ churchSpendingTypeRouter.put(
     }
   },
 );
-
 
 churchSpendingTypeRouter.delete(
   "/delete/:id",
@@ -122,13 +117,20 @@ churchSpendingTypeRouter.get(
             "Church SpendingType Detail found successfully",
             "OK",
             DataType.object,
-            spendingType
+            spendingType,
           ),
         );
       } else {
         res
           .status(404)
-          .json(normalize("Church SpendingType not found", "ERROR", DataType.null, null));
+          .json(
+            normalize(
+              "Church SpendingType not found",
+              "ERROR",
+              DataType.null,
+              null,
+            ),
+          );
       }
     } catch (error) {
       console.log(`ERROR_`, error);
@@ -140,35 +142,19 @@ churchSpendingTypeRouter.get(
 
 churchSpendingTypeRouter.get("/", async (_req: Request, res: Response) => {
   try {
-    let spendingTypeId = null;
-    const page = _req.query.page ? parseInt(_req.query.page as string, 10) : 1;
-    const limit = _req.query.limit
-      ? parseInt(_req.query.limit as string, 10)
-      : 10;
-    const search = _req.query.search ? String(_req.query.search) : undefined;
-    // If the value of query is string and except number show all without filter
-    if (
-      // Query paramater = _req.query.inventoryTypeId (string)
-      _req.query.spendingTypeId &&
-      // Function to checks if the given value is NaN (Not-a-Number)
-      !Number.isNaN(+_req.query.spendingTypeId)
-    ) {
-      // Change query string to Bigint
-      spendingTypeId = BigInt(_req.query.spendingType as string);
-    }
-    const spendingType = await getAllChurchSpendingTypeService({
-      page,
-      limit,
-      search,
-    });
+    const spendingType = await getAllChurchSpendingTypeService();
     res.send(
-      normalize("Church SpendingType found successfully.", "OK", DataType.array, {
-        spendingType
-      }),
+      normalize(
+        "Church SpendingType found successfully.",
+        "OK",
+        DataType.array,
+        {
+          spendingType,
+        },
+      ),
     );
   } catch (error) {
     const message = (error as any)?.message || "Internal server error";
     res.status(400).json(normalize(message, "ERROR", DataType.null, null));
   }
 });
-

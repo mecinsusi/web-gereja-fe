@@ -2,6 +2,7 @@ export interface ChurchIncomeCreateParams {
   id: bigint;
   detail: string;
   funds: bigint;
+  date: Date;
   incomeTypeId: bigint;
   incomeTypeName: string;
   description: string;
@@ -12,6 +13,7 @@ export interface ChurchIncomeUpdateParams {
   id: bigint;
   detail: string;
   funds: bigint;
+  date: Date;
   incomeTypeId: bigint;
   incomeTypeName: string;
   description: string;
@@ -21,4 +23,3 @@ export interface ChurchIncomeUpdateParams {
   updatedAt: Date;
   updatedBy: bigint;
 }
-

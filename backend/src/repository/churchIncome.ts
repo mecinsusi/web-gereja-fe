@@ -1,13 +1,19 @@
 import prisma from "../configuration/db";
-import { ChurchIncomeCreateParams, ChurchIncomeUpdateParams } from "../types/churchIncome";
+import {
+  ChurchIncomeCreateParams,
+  ChurchIncomeUpdateParams,
+} from "../types/churchIncome";
 
-export const createChurchIncome = async (churchIncome: ChurchIncomeCreateParams) => {
+export const createChurchIncome = async (
+  churchIncome: ChurchIncomeCreateParams,
+) => {
   const newChurchIncome = await prisma.$transaction(async (prisma) => {
     const createChurchIncome = await prisma.churchIncome.create({
       data: {
         id: churchIncome.id,
         detail: churchIncome.detail,
         funds: churchIncome.funds,
+        date: churchIncome.date,
         churchIncomeTypeIdRel: {
           connectOrCreate: {
             where: {
@@ -20,7 +26,7 @@ export const createChurchIncome = async (churchIncome: ChurchIncomeCreateParams)
             },
           },
         },
-      }
+      },
     });
     return createChurchIncome;
   });
@@ -47,22 +53,24 @@ export const updateChurchIncome = async (
         id: churchIncome.id,
         detail: churchIncome.detail,
         funds: churchIncome.funds,
+        date: churchIncome.date,
         churchIncomeTypeIdRel: {
           update: {
             data: {
               incomeTypeName: churchIncome.incomeTypeName,
               description: churchIncome.description,
-              code: churchIncome.code
+              code: churchIncome.code,
             },
           },
         },
-      }
+      },
     });
     await prisma.churchIncomeHistory.create({
       data: {
         id: currentChurchIncome.id,
         detail: currentChurchIncome.detail,
         funds: currentChurchIncome.funds,
+        date: currentChurchIncome.date,
         incomeTypeId: currentChurchIncome.incomeTypeId,
         createAt: currentChurchIncome.createAt,
         updatedAt: new Date(),
@@ -104,30 +112,14 @@ export const getChurchIncome = async (churchIncomeId: bigint) => {
   return churchIncome;
 };
 
-export const getAllChurchIncome = async (props: {
-  incomeTypeId: bigint | null;
-  page?: number;
-  limit?: number;
-  search?: string;
-}) => {
-  const { page = 1, limit = 10 } = props;
-  const filter = {} as any;
-  if (props.incomeTypeId != null) {
-    filter.incomeTypeId = props.incomeTypeId;
-  }
-  if (props.search) {
-    filter.inventoryName = { contains: props.search, mode: "insensitive" };
-  }
-  const allChurchIncome = await prisma.churchIncome.findMany({
-    where: {
-      ...filter,
-    },
-    include: {
-      churchIncomeTypeIdRel: true,
-    },
-    skip: (page - 1) * limit,
-    take: limit,
-  });
-  return allChurchIncome;
-}
+export const getAllChurchIncome = async () => {
+  const where: any = { deleted: false };
 
+  return await prisma.churchIncome.findMany({
+    where,
+    include: { churchIncomeTypeIdRel: true },
+    orderBy: {
+      date: "desc",
+    },
+  });
+};

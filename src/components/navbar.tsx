@@ -10,12 +10,20 @@ import {
 } from "react-icons/hi";
 import { PiFarmFill, PiChurchFill, PiStorefrontFill } from "react-icons/pi";
 import { twMerge } from "tailwind-merge";
+import { useRouter } from "next/navigation";
 
 export function NavbarSection() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
 
   // Fungsi untuk menutup sidebar
   const closeSidebar = () => setSidebarOpen(false);
+
+  //Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("access_token"); // hapus token
+    router.push("/login"); // redirect ke halaman login
+  };
 
   return (
     <div className="flex">
@@ -122,9 +130,10 @@ export function NavbarSection() {
           >
             <HiMenu className="h-6 w-6" />
           </button>
-          <Navbar.Brand href="/" className="mx-auto place-items-center">
-            <h1 className="text-lg font-bold tracking-wide">Gereja</h1>
-          </Navbar.Brand>
+          <Navbar.Brand
+            href="/"
+            className="mx-auto place-items-center"
+          ></Navbar.Brand>
           <Dropdown
             arrowIcon={false}
             inline
@@ -136,15 +145,7 @@ export function NavbarSection() {
               />
             }
           >
-            <Dropdown.Header>
-              <span className="block text-sm">Admin</span>
-              <span className="block truncate text-sm font-medium">
-                admin@gereja.com
-              </span>
-            </Dropdown.Header>
-            <Dropdown.Item>Dashboard</Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item>Sign out</Dropdown.Item>
+            <Dropdown.Item onClick={handleLogout}>Sign out</Dropdown.Item>
           </Dropdown>
         </Navbar>
       </div>

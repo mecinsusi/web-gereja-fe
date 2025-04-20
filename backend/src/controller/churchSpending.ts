@@ -5,7 +5,7 @@ import {
   patchChurchSpendingService,
   deleteChurchSpendingService,
   getChurchSpendingService,
-  getAllChurchSpendingService
+  getAllChurchSpendingService,
 } from "../service/churchSpending";
 
 import { body, param, validationResult } from "express-validator";
@@ -23,6 +23,7 @@ churchSpendingRouter.post(
   body("spendingTypeName").isString().trim(),
   body("description").isString().trim(),
   body("code").isString().trim(),
+  body("date").isISO8601(),
   async (req: Request, res: any) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -56,6 +57,7 @@ churchSpendingRouter.put(
   body("spendingTypeName").isString().trim(),
   body("description").isString().trim(),
   body("code").isString().trim(),
+  body("date").isISO8601(),
   async (req: Request, res: any) => {
     const errors = validationResult(req);
     console.log(`REQ_BODY_UPDATE_SPENDING`, req.body);
@@ -133,6 +135,20 @@ churchSpendingRouter.delete(
   },
 );
 
+churchSpendingRouter.get("/", async (_req: Request, res: Response) => {
+  try {
+    const spending = await getAllChurchSpendingService();
+    res.send(
+      normalize("Church Spending found successfully.", "OK", DataType.array, {
+        spending,
+      }),
+    );
+  } catch (error) {
+    const message = (error as any)?.message || "Internal server error";
+    res.status(400).json(normalize(message, "ERROR", DataType.null, null));
+  }
+});
+
 churchSpendingRouter.get(
   "/:id",
   param("id").isNumeric().trim(),
@@ -150,13 +166,20 @@ churchSpendingRouter.get(
             "Church Spending Detail found successfully",
             "OK",
             DataType.object,
-            spending
+            spending,
           ),
         );
       } else {
         res
           .status(404)
-          .json(normalize("Church Spending not found", "ERROR", DataType.null, null));
+          .json(
+            normalize(
+              "Church Spending not found",
+              "ERROR",
+              DataType.null,
+              null,
+            ),
+          );
       }
     } catch (error) {
       console.log(`ERROR_`, error);
@@ -165,39 +188,3 @@ churchSpendingRouter.get(
     }
   },
 );
-
-churchSpendingRouter.get("/", async (_req: Request, res: Response) => {
-  try {
-    let spendingTypeId = null;
-    const page = _req.query.page ? parseInt(_req.query.page as string, 10) : 1;
-    const limit = _req.query.limit
-      ? parseInt(_req.query.limit as string, 10)
-      : 10;
-    const search = _req.query.search ? String(_req.query.search) : undefined;
-    // If the value of query is string and except number show all without filter
-    if (
-      // Query paramater = _req.query.inventoryTypeId (string)
-      _req.query.spendingTypeId &&
-      // Function to checks if the given value is NaN (Not-a-Number)
-      !Number.isNaN(+_req.query.spendingTypeId)
-    ) {
-      // Change query string to Bigint
-      spendingTypeId = BigInt(_req.query.incomeTypeId as string);
-    }
-    const spending = await getAllChurchSpendingService({
-      spendingTypeId,
-      page,
-      limit,
-      search,
-    });
-    res.send(
-      normalize("Church Spending found successfully.", "OK", DataType.array, {
-        spending
-      }),
-    );
-  } catch (error) {
-    const message = (error as any)?.message || "Internal server error";
-    res.status(400).json(normalize(message, "ERROR", DataType.null, null));
-  }
-});
-

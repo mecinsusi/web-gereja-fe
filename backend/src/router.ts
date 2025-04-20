@@ -31,26 +31,24 @@ app.use("/api/authentication", authenticationRouter);
 app.get("/api/healthz", (_req, res) => {
   res.send("OK");
 });
-// ✅ Handle requests to "/"
+// Handle requests to "/"
 app.get("/", (_req, res) => {
   res.send("Welcome to Express Backend!");
 });
 
 //Apply the middleware globally
-/**
 app.use(authorizationMiddleware);
-*/
 
 //Protected Routes
-app.use("/api/churchincome", churchIncomeRouter)
-app.use("/api/churchincometype", churchIncomeTypeRouter)
-app.use("/api/churchspending", churchSpendingRouter)
-app.use("/api/churchspendingtype", churchSpendingTypeRouter)
-app.use("/api/farmincome", farmIncomeRouter)
-app.use("/api/farmincometype", farmIncomeTypeRouter)
-app.use("/api/farmspending", farmSpendingRouter)
-app.use("/api/farmspendingtype", farmSpendingTypeRouter)
-app.use("/api/storeincome", storeIncomeRouter)
-app.use("/api/storeincometype", storeIncomeTypeRouter)
-app.use("/api/storespending", storeSpendingRouter)
-app.use("/api/storespendingtype", storeSpendingTypeRouter)
+app.use("/api/churchincome", churchIncomeRouter);
+app.use("/api/churchincometype", churchIncomeTypeRouter);
+app.use("/api/churchspending", churchSpendingRouter);
+app.use("/api/churchspendingtype", churchSpendingTypeRouter);
+app.use("/api/farmincome", farmIncomeRouter);
+app.use("/api/farmincometype", farmIncomeTypeRouter);
+app.use("/api/farmspending", farmSpendingRouter);
+app.use("/api/farmspendingtype", farmSpendingTypeRouter);
+app.use("/api/storeincome", storeIncomeRouter);
+app.use("/api/storeincometype", storeIncomeTypeRouter);
+app.use("/api/storespending", storeSpendingRouter);
+app.use("/api/storespendingtype", storeSpendingTypeRouter);

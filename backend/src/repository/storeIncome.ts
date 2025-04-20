@@ -7,6 +7,7 @@ export const createStoreIncome = async (storeIncome: any) => {
         id: storeIncome.id,
         detail: storeIncome.detail,
         funds: storeIncome.funds,
+        date: storeIncome.date,
         storeIncomeTypeIdRel: {
           connectOrCreate: {
             where: {
@@ -46,6 +47,7 @@ export const updateStoreIncome = async (
         id: storeIncome.id,
         detail: storeIncome.detail,
         funds: storeIncome.funds,
+        date: storeIncome.date,
         storeIncomeTypeIdRel: {
           update: {
             data: {
@@ -62,6 +64,7 @@ export const updateStoreIncome = async (
         id: currentStoreIncome.id,
         detail: currentStoreIncome.detail,
         funds: currentStoreIncome.funds,
+        date: currentStoreIncome.date,
         incomeTypeId: currentStoreIncome.incomeTypeId,
         createAt: currentStoreIncome.createAt,
         updatedAt: new Date(),

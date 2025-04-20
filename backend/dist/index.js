@@ -12,15 +12,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const client_1 = require("@prisma/client");
-const app = (0, express_1.default)();
-const prisma = new client_1.PrismaClient();
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
-app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.send("Hello, Express with Prisma!");
+const db_1 = __importDefault(require("./configuration/db"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const router_1 = require("./router");
+// Load environment variables
+dotenv_1.default.config();
+// Fix BigInt to JSON serialization
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+    return Number(this);
+};
+const port = process.env.PORT || 5000;
+router_1.app.listen(port, () => {
+    console.log(`🚀 Server is running on port ${port}`);
+});
+// Graceful shutdown for Prisma
+process.on("SIGINT", () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Shutting down gracefully...");
+    yield db_1.default.$disconnect();
+    process.exit(0);
 }));
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+process.on("SIGTERM", () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Process terminated.");
+    yield db_1.default.$disconnect();
+    process.exit(0);
+}));

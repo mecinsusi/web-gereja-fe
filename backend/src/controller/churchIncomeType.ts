@@ -4,7 +4,7 @@ import {
   updateChurchIncomeTypeService,
   deleteChurchIncomeTypeService,
   getChurchIncomeTypeService,
-  getAllChurchIncomeTypeService
+  getAllChurchIncomeTypeService,
 } from "../service/churchIncomeType";
 
 import { body, param, validationResult } from "express-validator";
@@ -15,9 +15,7 @@ export const churchIncomeTypeRouter = Router();
 
 churchIncomeTypeRouter.post(
   "/create",
-  body("detail").isString().trim(),
-  body("funds").isInt(),
-  body("incomeTypeTypeName").isString().trim(),
+  body("incomeTypeName").isString().trim(),
   body("description").isString().trim(),
   body("code").isString().trim(),
   async (req: Request, res: any) => {
@@ -46,8 +44,6 @@ churchIncomeTypeRouter.post(
 churchIncomeTypeRouter.put(
   "/update/:id",
   param("id").isNumeric().trim(),
-  body("detail").isString().trim(),
-  body("funds").isInt(),
   body("incomeTypeTypeName").isString().trim(),
   body("description").isString().trim(),
   body("code").isString().trim(),
@@ -75,7 +71,6 @@ churchIncomeTypeRouter.put(
     }
   },
 );
-
 
 churchIncomeTypeRouter.delete(
   "/delete/:id",
@@ -122,13 +117,20 @@ churchIncomeTypeRouter.get(
             "Church IncomeType Detail found successfully",
             "OK",
             DataType.object,
-            incomeType
+            incomeType,
           ),
         );
       } else {
         res
           .status(404)
-          .json(normalize("Church IncomeType not found", "ERROR", DataType.null, null));
+          .json(
+            normalize(
+              "Church IncomeType not found",
+              "ERROR",
+              DataType.null,
+              null,
+            ),
+          );
       }
     } catch (error) {
       console.log(`ERROR_`, error);
@@ -140,35 +142,19 @@ churchIncomeTypeRouter.get(
 
 churchIncomeTypeRouter.get("/", async (_req: Request, res: Response) => {
   try {
-    let incomeTypeId = null;
-    const page = _req.query.page ? parseInt(_req.query.page as string, 10) : 1;
-    const limit = _req.query.limit
-      ? parseInt(_req.query.limit as string, 10)
-      : 10;
-    const search = _req.query.search ? String(_req.query.search) : undefined;
-    // If the value of query is string and except number show all without filter
-    if (
-      // Query paramater = _req.query.inventoryTypeId (string)
-      _req.query.incomeTypeId &&
-      // Function to checks if the given value is NaN (Not-a-Number)
-      !Number.isNaN(+_req.query.incomeTypeId)
-    ) {
-      // Change query string to Bigint
-      incomeTypeId = BigInt(_req.query.incomeTypeId as string);
-    }
-    const incomeType = await getAllChurchIncomeTypeService({
-      page,
-      limit,
-      search,
-    });
+    const incomeType = await getAllChurchIncomeTypeService();
     res.send(
-      normalize("Church IncomeType found successfully.", "OK", DataType.array, {
-        incomeType
-      }),
+      normalize(
+        "Church IncomeType found successfully.",
+        "OK",
+        DataType.object,
+        {
+          incomeType,
+        },
+      ),
     );
   } catch (error) {
     const message = (error as any)?.message || "Internal server error";
     res.status(400).json(normalize(message, "ERROR", DataType.null, null));
   }
 });
-

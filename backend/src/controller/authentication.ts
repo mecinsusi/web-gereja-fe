@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Request, Router } from "express";
 
 import { body, validationResult } from "express-validator";
 import { normalize } from "../utils/normalize";

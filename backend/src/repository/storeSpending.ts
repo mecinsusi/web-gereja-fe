@@ -7,6 +7,7 @@ export const createStoreSpending = async (storeSpending: any) => {
         id: storeSpending.id,
         detail: storeSpending.detail,
         funds: storeSpending.funds,
+        date: storeSpending.date,
         storeSpendingTypeIdRel: {
           connectOrCreate: {
             where: {
@@ -19,7 +20,7 @@ export const createStoreSpending = async (storeSpending: any) => {
             },
           },
         },
-      }
+      },
     });
     return createStoreSpending;
   });
@@ -46,22 +47,24 @@ export const updateStoreSpending = async (
         id: storeSpending.id,
         detail: storeSpending.detail,
         funds: storeSpending.funds,
+        date: storeSpending.date,
         storeSpendingTypeIdRel: {
           update: {
             data: {
               spendingTypeName: storeSpending.spendingTypeName,
               description: storeSpending.description,
-              code: storeSpending.code
+              code: storeSpending.code,
             },
           },
         },
-      }
+      },
     });
     await prisma.storeSpendingHistory.create({
       data: {
         id: currentStoreSpending.id,
         detail: currentStoreSpending.detail,
         funds: currentStoreSpending.funds,
+        date: currentStoreSpending.date,
         spendingTypeId: currentStoreSpending.spendingTypeId,
         createAt: currentStoreSpending.createAt,
         updatedAt: new Date(),
@@ -128,5 +131,4 @@ export const getAllStoreSpending = async (props: {
     take: limit,
   });
   return allStoreSpending;
-}
-
+};

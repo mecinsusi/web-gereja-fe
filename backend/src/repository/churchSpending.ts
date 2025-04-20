@@ -1,18 +1,25 @@
+import {
+  ChurchSpendingCreateParams,
+  ChurchSpendingUpdateParams,
+} from "..//types/churchSpending";
 import prisma from "../configuration/db";
 
-export const createChurchSpending = async (churchSpending: any) => {
+export const createChurchSpending = async (
+  churchSpending: ChurchSpendingCreateParams,
+) => {
   const newChurchSpending = await prisma.$transaction(async (prisma) => {
     const createChurchSpending = await prisma.churchSpending.create({
       data: {
         id: churchSpending.id,
         detail: churchSpending.detail,
         funds: churchSpending.funds,
-        bill: churchSpending.bill,
-        billNumber: churchSpending.billNumber,
+        date: churchSpending.date,
+        bill: churchSpending.bill || "",
+        billNumber: churchSpending.billNumber || "",
         churchSpendingTypeIdRel: {
           connectOrCreate: {
             where: {
-              id: churchSpending.incomeTypeId,
+              id: churchSpending.spendingTypeId,
             },
             create: {
               spendingTypeName: churchSpending.spendingTypeName,
@@ -21,7 +28,7 @@ export const createChurchSpending = async (churchSpending: any) => {
             },
           },
         },
-      }
+      },
     });
     return createChurchSpending;
   });
@@ -30,7 +37,7 @@ export const createChurchSpending = async (churchSpending: any) => {
 
 export const updateChurchSpending = async (
   churchSpendingId: bigint,
-  churchSpending: any,
+  churchSpending: ChurchSpendingUpdateParams,
 ) => {
   const newUpdatedChurchSpending = await prisma.$transaction(async (prisma) => {
     const currentChurchSpending = await prisma.churchSpending.findUnique({
@@ -48,26 +55,28 @@ export const updateChurchSpending = async (
         id: churchSpending.id,
         detail: churchSpending.detail,
         funds: churchSpending.funds,
-        bill: churchSpending.bill,
-        billNumber: churchSpending.billNumber,
+        date: churchSpending.date,
+        bill: churchSpending.bill || "",
+        billNumber: churchSpending.billNumber || "",
         churchSpendingTypeIdRel: {
           update: {
             data: {
               spendingTypeName: churchSpending.spendingTypeName,
               description: churchSpending.description,
-              code: churchSpending.code
+              code: churchSpending.code,
             },
           },
         },
-      }
+      },
     });
     await prisma.churchSpendingHistory.create({
       data: {
         id: currentChurchSpending.id,
         detail: currentChurchSpending.detail,
         funds: currentChurchSpending.funds,
-        bill: currentChurchSpending.bill,
-        billNumber: currentChurchSpending.billNumber,
+        date: currentChurchSpending.date,
+        bill: currentChurchSpending.bill || "",
+        billNumber: currentChurchSpending.billNumber || "",
         spendingTypeId: currentChurchSpending.spendingTypeId,
         createAt: currentChurchSpending.createAt,
         updatedAt: new Date(),
@@ -109,30 +118,37 @@ export const getChurchSpending = async (churchSpendingId: bigint) => {
   return churchSpending;
 };
 
-export const getAllChurchSpending = async (props: {
-  spendingTypeId: bigint | null;
-  page?: number;
-  limit?: number;
-  search?: string;
+export const getChurchIncome = async (props: {
+  incomeTypeId?: bigint | null;
+  startDate?: Date;
+  endDate?: Date;
 }) => {
-  const { page = 1, limit = 10 } = props;
-  const filter = {} as any;
-  if (props.spendingTypeId != null) {
-    filter.spendingTypeId = props.spendingTypeId;
-  }
-  if (props.search) {
-    filter.inventoryName = { contains: props.search, mode: "insensitive" };
-  }
-  const allChurchSpending = await prisma.churchSpending.findMany({
-    where: {
-      ...filter,
-    },
-    include: {
-      churchSpendingTypeIdRel: true,
-    },
-    skip: (page - 1) * limit,
-    take: limit,
-  });
-  return allChurchSpending;
-}
+  const where: any = {};
 
+  if (props.incomeTypeId) {
+    where.incomeTypeId = props.incomeTypeId;
+  }
+
+  if (props.startDate || props.endDate) {
+    where.createAt = {};
+    if (props.startDate) where.createAt.gte = props.startDate;
+    if (props.endDate) where.createAt.lte = props.endDate;
+  }
+
+  return await prisma.churchIncome.findMany({
+    where,
+    include: { churchIncomeTypeIdRel: true },
+  });
+};
+
+export const getAllChurchSpending = async () => {
+  const where: any = { deleted: false };
+
+  return await prisma.churchSpending.findMany({
+    where,
+    include: { churchSpendingTypeIdRel: true },
+    orderBy: {
+      date: "desc",
+    },
+  });
+};

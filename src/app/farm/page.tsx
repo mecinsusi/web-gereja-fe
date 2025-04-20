@@ -15,9 +15,6 @@ const FarmReport = () => {
           <Table.HeadCell>Debet</Table.HeadCell>
           <Table.HeadCell>Kredit</Table.HeadCell>
           <Table.HeadCell>Kode Nota</Table.HeadCell>
-          <Table.HeadCell>
-            <span className="sr-only">Edit</span>
-          </Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -31,9 +28,6 @@ const FarmReport = () => {
             <Table.Cell>30.000</Table.Cell>
             <Table.Cell>21</Table.Cell>
             <Table.Cell className='space-x-4'>
-              <a href="#" className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
-                Edit
-              </a>
               <a href="#" className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
                 Delete
               </a>

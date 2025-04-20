@@ -8,6 +8,7 @@ export const createFarmIncome = async (farmIncome: any) => {
         detail: farmIncome.detail,
         price: farmIncome.funds,
         amount: farmIncome.amount,
+        date: farmIncome.date,
         farmIncomeTypeIdRel: {
           connectOrCreate: {
             where: {
@@ -20,7 +21,7 @@ export const createFarmIncome = async (farmIncome: any) => {
             },
           },
         },
-      }
+      },
     });
     return createFarmIncome;
   });
@@ -48,22 +49,24 @@ export const updateFarmIncome = async (
         detail: farmIncome.detail,
         price: farmIncome.price,
         amount: farmIncome.amount,
+        date: farmIncome.date,
         farmIncomeTypeIdRel: {
           update: {
             data: {
               incomeTypeName: farmIncome.incomeTypeName,
               description: farmIncome.description,
-              code: farmIncome.code
+              code: farmIncome.code,
             },
           },
         },
-      }
+      },
     });
     await prisma.farmIncomeHistory.create({
       data: {
         id: currentFarmIncome.id,
         detail: currentFarmIncome.detail,
         price: currentFarmIncome.price,
+        date: currentFarmIncome.date,
         amount: currentFarmIncome.amount,
         incomeTypeId: currentFarmIncome.incomeTypeId,
         createAt: currentFarmIncome.createAt,
@@ -131,5 +134,4 @@ export const getAllFarmIncome = async (props: {
     take: limit,
   });
   return allFarmIncome;
-}
-
+};

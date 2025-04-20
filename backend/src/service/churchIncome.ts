@@ -4,8 +4,8 @@ import {
   updateChurchIncome,
   deleteChurchIncome,
   getAllChurchIncome,
+  patchChurchIncome,
   getChurchIncome,
-  patchChurchIncome
 } from "../repository/churchIncome";
 import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 
@@ -13,7 +13,12 @@ import {
   ChurchIncomeCreateParams,
   ChurchIncomeUpdateParams,
 } from "../types/churchIncome";
-import { checkIcomeTypeName, createChurchIncomeType, getChurchIncomeType } from "../repository/churchIncomeType";
+import {
+  checkIcomeTypeName,
+  createChurchIncomeType,
+  getChurchIncomeType,
+} from "../repository/churchIncomeType";
+import { getAllChurchSpending } from "../repository/churchSpending";
 
 export const createChurchIncomeService = async (
   income: ChurchIncomeCreateParams,
@@ -29,7 +34,7 @@ export const createChurchIncomeService = async (
       id: income.incomeTypeId,
       incomeTypeName: income.incomeTypeName,
       description: income.description,
-      code: income.code
+      code: income.code,
     });
   }
   if (!incomeType || !incomeType.id) {
@@ -100,18 +105,43 @@ export const getChurchIncomeService = async (incomeId: bigint) => {
   return income;
 };
 
-export const getAllChurchIncomeService = async (props: {
-  incomeTypeId: bigint | null;
-  page?: number;
-  limit?: number;
-  search?: string;
-}) => {
-  const allIncome = await getAllChurchIncome({
-    incomeTypeId: props.incomeTypeId,
-    page: props.page,
-    limit: props.limit,
-    search: props.search,
-  });
+export const getAllChurchIncomeService = async () => {
+  const allIncome = await getAllChurchIncome();
   console.log(`ALL_CHURCH_INCOME`, allIncome);
   return allIncome;
+};
+
+export const getAllFinanceService = async () => {
+  const [income, spending] = await Promise.all([
+    getAllChurchIncome(),
+    getAllChurchSpending(),
+  ]);
+  console.log(income);
+  console.log(spending);
+
+  const incomeFormatted = income.map((item) => ({
+    id: `income-${item.id}`,
+    date: item.date,
+    type: "income",
+    detail: item.detail,
+    amount: item.funds,
+    category: item.churchIncomeTypeIdRel?.incomeTypeName || "-",
+    code: item.churchIncomeTypeIdRel?.code || "-",
+  }));
+
+  const spendingFormatted = spending.map((item) => ({
+    id: `spending-${item.id}`,
+    date: item.date,
+    type: "spending",
+    detail: item.detail,
+    amount: -item.funds,
+    category: item.churchSpendingTypeIdRel?.spendingTypeName || "-",
+    code: item.churchSpendingTypeIdRel?.code || "-",
+  }));
+
+  const combined = [...incomeFormatted, ...spendingFormatted].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+
+  return combined;
 };

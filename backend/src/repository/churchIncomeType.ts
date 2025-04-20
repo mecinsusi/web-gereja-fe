@@ -1,6 +1,9 @@
+import { ChurchIncomeTypeCreateParams } from "../types/churchIncomeType";
 import prisma from "../configuration/db";
 
-export const createChurchIncomeType = async (churchIncomeType: any) => {
+export const createChurchIncomeType = async (
+  churchIncomeType: ChurchIncomeTypeCreateParams,
+) => {
   const newChurchIncomeType = await prisma.$transaction(async (prisma) => {
     const createChurchIncomeType = await prisma.churchIncomeType.create({
       data: {
@@ -8,7 +11,7 @@ export const createChurchIncomeType = async (churchIncomeType: any) => {
         incomeTypeName: churchIncomeType.incomeTypeName,
         code: churchIncomeType.code,
         description: churchIncomeType.description,
-      }
+      },
     });
     return createChurchIncomeType;
   });
@@ -56,30 +59,12 @@ export const getChurchIncomeType = async (churchIncomeTypeTypeId: bigint) => {
   });
   return churchIncomeTypeType;
 };
-export const getAllChurchIncomeType = async (props: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}) => {
-  const { page = 1, limit = 10 } = props;
-  const filter = {} as any;
-  if (props.search) {
-    filter.incomeTypeName = { contains: props.search, mode: "insensitive" };
-  }
-  const allIncomeType = await prisma.churchIncomeType.findMany({
-    where: { ...filter},
-    orderBy: { incomeTypeName: "asc" },
-    skip: (page - 1) * limit,
-    take: limit,
+
+export const getAllChurchIncomeType = async () => {
+  const where: any = { deleted: false };
+  return await prisma.churchIncomeType.findMany({
+    where,
   });
-  const totalIncomeType = await prisma.churchIncomeType.count({
-    where: { ...filter},
-  });
-  return {
-    incomeType: allIncomeType,
-    currentPage: page,
-    totalPage: Math.ceil(totalIncomeType / limit),
-  };
 };
 
 export const checkIcomeTypeName = async (incomeType: {

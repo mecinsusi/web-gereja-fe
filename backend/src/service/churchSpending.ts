@@ -4,14 +4,23 @@ import {
   deleteChurchSpending,
   getAllChurchSpending,
   getChurchSpending,
-  patchChurchSpending
+  patchChurchSpending,
 } from "../repository/churchSpending";
 import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 
-import { checkSpendingTypeName, createChurchSpendingType, getChurchSpendingType } from "../repository/churchSpendingType";
+import {
+  checkSpendingTypeName,
+  createChurchSpendingType,
+  getChurchSpendingType,
+} from "../repository/churchSpendingType";
+import {
+  ChurchSpendingCreateParams,
+  ChurchSpendingUpdateParams,
+} from "../types/churchSpending";
+
 
 export const createChurchSpendingService = async (
-  spending: any,
+  spending: ChurchSpendingCreateParams,
 ) => {
   let spendingType;
   const existsSpendingType = await checkSpendingTypeName({
@@ -22,9 +31,9 @@ export const createChurchSpendingService = async (
   } else {
     spendingType = await createChurchSpendingType({
       id: spending.spendingTypeId,
-      spendingTypeName: spending.incomeTypeName,
+      spendingTypeName: spending.spendingTypeName,
       description: spending.description,
-      code: spending.code
+      code: spending.code,
     });
   }
   if (!spendingType || !spendingType.id) {
@@ -48,7 +57,7 @@ export const createChurchSpendingService = async (
 
 export const updateChurchSpendingService = async (
   spendingId: bigint,
-  spending: any,
+  spending: ChurchSpendingUpdateParams,
 ) => {
   const updatedSpending = await updateChurchSpending(spendingId, spending);
   return updatedSpending;
@@ -95,18 +104,8 @@ export const getChurchSpendingService = async (spendingId: bigint) => {
   return spending;
 };
 
-export const getAllChurchSpendingService = async (props: {
-  spendingTypeId: bigint | null;
-  page?: number;
-  limit?: number;
-  search?: string;
-}) => {
-  const allSpending = await getAllChurchSpending({
-    spendingTypeId: props.spendingTypeId,
-    page: props.page,
-    limit: props.limit,
-    search: props.search,
-  });
+export const getAllChurchSpendingService = async () => {
+  const allSpending = await getAllChurchSpending();
   console.log(`ALL_CHURCH_SPENDING`, allSpending);
   return allSpending;
 };

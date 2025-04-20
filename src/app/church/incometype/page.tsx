@@ -1,71 +1,76 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table } from "flowbite-react";
+import { getIncomeType, deleteIncomeType } from "@/services/church/income";
 import { ButtonGroup } from "@/components/button";
 
 const IncomeCodeAccount = () => {
-  const transactions = [
-    {
-      id: 1,
-      date: "01/12/2025",
-      account: "1.1.1",
-      description: "Apple MacBook Pro",
-    },
-    {
-      id: 2,
-      date: "02/12/2025",
-      account: "1.1.2",
-      description: "Samsung Galaxy S21",
-    },
-  ];
+  const [incomeTypeList, setIncomeTypeList] = useState<any[]>([]);
+
+  // Fetch kode akun saat pertama kali render
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const data = await getIncomeType();
+      setIncomeTypeList(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Apakah kamu yakin ingin menghapus pemasukan ini?")) {
+      try {
+        await deleteIncomeType(id);
+        setIncomeTypeList((prev) => prev.filter((item) => item.id !== id));
+      } catch (err) {
+        console.error("Gagal menghapus:", err);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col overflow-x-auto">
       <div className="flex py-4 mx-2">
         <div className="text-center text-lg uppercase font-bold items-center mx-auto">
           <h1>Kode Akun</h1>
           <h2>Pemasukan</h2>
-          <h3>PAROKI "MARIA BUNDA KARMEL" KASONGAN</h3>
         </div>
-        <div className="max-h-4">
-          <ButtonGroup />
+        <div>
+          <ButtonGroup
+            tableName="Input Kode Akun"
+            path="/church/incometype/create"
+          />
         </div>
       </div>
       <Table hoverable>
         <Table.Head>
           <Table.HeadCell>No</Table.HeadCell>
-          <Table.HeadCell>Tanggal</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
-          <Table.HeadCell>
-            <span className="sr-only">Edit</span>
-          </Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
-          {transactions.map((item, index) => (
+          {incomeTypeList?.map((item: any, index) => (
             <Table.Row
               key={item.id}
               className="bg-white dark:border-gray-700 dark:bg-gray-800"
             >
               <Table.Cell>{index + 1}</Table.Cell>
-              <Table.Cell>{item.date}</Table.Cell>
-              <Table.Cell>{item.account}</Table.Cell>
+              <Table.Cell>{item.code}</Table.Cell>
               <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                {item.description}
+                {item.incomeTypeName}
               </Table.Cell>
               <Table.Cell className="space-x-4">
-                <a
-                  href="#"
-                  className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
-                >
-                  Edit
-                </a>
-                <a
-                  href="#"
-                  className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-red-600 hover:underline"
                 >
                   Delete
-                </a>
+                </button>
               </Table.Cell>
             </Table.Row>
           ))}
