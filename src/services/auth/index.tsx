@@ -26,7 +26,7 @@ export const login = async (data: LoginData): Promise<{ token: string }> => {
 
   if (!token) throw new Error("Token tidak ditemukan di response");
 
-  // ✅ Simpan token ke localStorage
+  // Simpan token ke localStorage
   localStorage.setItem("access_token", token);
 
   return { token };
