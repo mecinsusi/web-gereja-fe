@@ -14,6 +14,7 @@ export const login = async (data: LoginData): Promise<{ token: string }> => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
+    credentials: "include",
   });
 
   if (!res.ok) {
