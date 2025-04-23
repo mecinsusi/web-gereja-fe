@@ -17,10 +17,11 @@ interface SpendingType {
 
 const CreateSpending = () => {
   const [spendingTypeList, setSpendingTypeList] = useState<SpendingType[]>([]);
+  const [notaFile, setNotaFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     tanggal: "",
     kodeAkun: "",
-    debit: "",
+    kredit: "",
     keterangan: "",
     kodeNota: "",
     nota: "",
@@ -42,12 +43,45 @@ const CreateSpending = () => {
     setForm((prev) => ({ ...prev, kodeAkun: value }));
   };
 
+  // Handle upload image
+  const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      if (!file.type.startsWith("image/")) {
+        console.error("File bukan gambar!");
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      setForm((prev) => ({ ...prev, nota: url }));
+      setNotaFile(file); // ✅ simpan file asli ke state
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (form.nota) {
+        URL.revokeObjectURL(form.nota); // Membersihkan URL
+      }
+    };
+  }, [form.nota]);
+
+  //Handle cancel image upload
+  const handleCancelImage = () => {
+    setForm((prev) => ({
+      ...prev,
+      nota: "",
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const selectedAccount = spendingTypeList.find(
       (acc) => acc.code === form.kodeAkun,
     );
+
     console.log(selectedAccount);
 
     if (!selectedAccount) {
@@ -58,8 +92,8 @@ const CreateSpending = () => {
 
     const payload = {
       detail: form.keterangan,
-      funds: parseFloat(form.debit),
-      bill: form.nota,
+      funds: parseFloat(form.kredit),
+      bill: notaFile, // kirim file, bukan blob URL
       billNumber: form.kodeNota,
       date: new Date(form.tanggal).toISOString(),
       spendingTypeId: selectedAccount.id,
@@ -71,14 +105,16 @@ const CreateSpending = () => {
     try {
       await createSpending(payload);
       alert("Data pengeluaran berhasil disimpan");
+
       setForm({
         tanggal: "",
         kodeAkun: "",
-        debit: "",
+        kredit: "",
         keterangan: "",
         nota: "",
         kodeNota: "",
       });
+      setNotaFile(null); // reset file
     } catch (error) {
       console.error("Gagal menyimpan data pengeluaran:", error);
       alert("Terjadi kesalahan saat menyimpan data");
@@ -86,7 +122,7 @@ const CreateSpending = () => {
   };
 
   return (
-    <div className="flex flex-col-2 p-4 gap-12 w-full">
+    <div className="flex flex-col-2 p-4 w-full">
       <div className="w-1/2 mx-auto mt-10 p-6 bg-white shadow rounded-lg">
         <SpendingCodeAccount />
       </div>
@@ -127,14 +163,14 @@ const CreateSpending = () => {
             </Select>
           </div>
           <div>
-            <Label htmlFor="debit" value="Debit" />
+            <Label htmlFor="kredit" value="Kredit" />
             <TextInput
-              id="debit"
-              name="debit"
+              id="kredit"
+              name="kredit"
               type="number"
               required
               onChange={handleChange}
-              value={form.debit}
+              value={form.kredit}
             />
           </div>
           <div>
@@ -156,12 +192,28 @@ const CreateSpending = () => {
               value={form.kodeNota}
               onChange={handleChange}
             />
+            {form.nota && (
+              <div className="relative">
+                <img
+                  src={form.nota}
+                  alt="Preview"
+                  style={{ width: "200px" }}
+                  className="mt-2 h-auto border rounded shadow-lg"
+                />
+                <button
+                  onClick={handleCancelImage}
+                  className="absolute top-2 right-4 bg-red-700 text-white py-1 px-2 font-bold rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <Label className="mb-2 block" htmlFor="file-upload">
               Upload Nota
             </Label>
-            <FileInput id="nota" />
+            <FileInput id="nota" name="nota" onChange={handleUploadImage} />
           </div>
           <div className="md:col-span-2 text-right">
             <Button color="blue" type="submit">

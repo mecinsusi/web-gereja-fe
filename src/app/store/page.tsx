@@ -12,7 +12,7 @@ const StoreReport = () => {
           <Table.HeadCell>Tanggal</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
-          <Table.HeadCell>Debet</Table.HeadCell>
+          <Table.HeadCell>Debit</Table.HeadCell>
           <Table.HeadCell>Kredit</Table.HeadCell>
           <Table.HeadCell>Kode Nota</Table.HeadCell>
         </Table.Head>

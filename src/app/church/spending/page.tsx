@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { Table } from "flowbite-react";
 import { ButtonGroup } from "@/components/button";
-import { getSpending, deleteSpending } from "@/services/church/spending";
+import {
+  getSpending,
+  deleteSpending,
+} from "@/services/church/spending";
 
 const SpendingList = () => {
   const [spendingList, setSpendingList] = useState<any[]>([]);
@@ -58,8 +61,9 @@ const SpendingList = () => {
           <Table.HeadCell>Tanggal</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
-          <Table.HeadCell>Debet</Table.HeadCell>
-          <Table.HeadCell>Kode Nota</Table.HeadCell>
+          <Table.HeadCell>Kredit</Table.HeadCell>
+          <Table.HeadCell>Nomor Nota</Table.HeadCell>
+          <Table.HeadCell>Nota</Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           {spendingList?.map((item: any, index) => (
@@ -77,6 +81,19 @@ const SpendingList = () => {
               </Table.Cell>
               <Table.Cell>{item.funds.toLocaleString()}</Table.Cell>
               <Table.Cell>{item.billNumber}</Table.Cell>
+              <Table.Cell>
+                {item.bill ? (
+                  <a href={item.bill} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={item.bill} // Menggunakan URL gambar yang sudah diberi otentikasi
+                      alt="Nota"
+                      className="h-16 w-auto object-contain border rounded"
+                    />
+                  </a>
+                ) : (
+                  <span className="text-gray-500 italic">-</span>
+                )}
+              </Table.Cell>
               <Table.Cell className="space-x-4">
                 <button
                   onClick={() => handleDelete(item.id)}

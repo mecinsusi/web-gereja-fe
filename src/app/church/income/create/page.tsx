@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Label, TextInput, Select } from "flowbite-react";
+import { Button, Label, TextInput, Select, FileInput } from "flowbite-react";
 import IncomeCodeAccount from "../../incometype/page";
 import { createIncome, getIncomeType } from "@/services/church/income";
 
@@ -10,15 +10,20 @@ interface IncomeType {
   incomeTypeName: string;
   code: string;
   description: string;
+  bill: string;
+  billNumber: string;
 }
 
 const CreateIncome = () => {
   const [incomeTypeList, setIncomeTypeList] = useState<IncomeType[]>([]);
+  const [notaFile, setNotaFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     tanggal: "",
     kodeAkun: "",
-    kredit: "",
+    debit: "",
     keterangan: "",
+    kodeNota: "",
+    nota: "",
   });
 
   useEffect(() => {
@@ -37,6 +42,38 @@ const CreateIncome = () => {
     setForm((prev) => ({ ...prev, kodeAkun: value }));
   };
 
+  // Handle upload image
+  const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      if (!file.type.startsWith("image/")) {
+        console.error("File bukan gambar!");
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      setForm((prev) => ({ ...prev, nota: url }));
+      setNotaFile(file); // ✅ simpan file asli ke state
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (form.nota) {
+        URL.revokeObjectURL(form.nota); // Membersihkan URL
+      }
+    };
+  }, [form.nota]);
+
+  //Handle cancel image upload
+  const handleCancelImage = () => {
+    setForm((prev) => ({
+      ...prev,
+      nota: "",
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -53,7 +90,9 @@ const CreateIncome = () => {
 
     const payload = {
       detail: form.keterangan,
-      funds: parseFloat(form.kredit),
+      funds: parseFloat(form.debit),
+      bill: notaFile,
+      billNumber: form.kodeNota,
       incomeTypeId: selectedAccount.id,
       code: selectedAccount.code,
       description: selectedAccount.description,
@@ -64,7 +103,16 @@ const CreateIncome = () => {
     try {
       await createIncome(payload);
       alert("Data pemasukan berhasil disimpan");
-      setForm({ tanggal: "", kodeAkun: "", kredit: "", keterangan: "" });
+
+      setForm({
+        tanggal: "",
+        kodeAkun: "",
+        debit: "",
+        keterangan: "",
+        nota: "",
+        kodeNota: "",
+      });
+      setNotaFile(null);
     } catch (error) {
       console.error("Gagal menyimpan data pemasukan:", error);
       alert("Terjadi kesalahan saat menyimpan data");
@@ -72,7 +120,7 @@ const CreateIncome = () => {
   };
 
   return (
-    <div className="flex flex-col-2 p-4 gap-12 w-full">
+    <div className="flex flex-col-2 p-4 w-full">
       <div className="w-1/2 mx-auto mt-10 p-6 bg-white shadow rounded-lg">
         <IncomeCodeAccount />
       </div>
@@ -112,14 +160,14 @@ const CreateIncome = () => {
             </Select>
           </div>
           <div className="space-y-4">
-            <Label htmlFor="kredit" value="Kredit" />
+            <Label htmlFor="debit" value="Debit" />
             <TextInput
-              id="kredit"
-              name="kredit"
+              id="debit"
+              name="debit"
               type="number"
               required
               onChange={handleChange}
-              value={form.kredit}
+              value={form.debit}
             />
             <Label htmlFor="keterangan" value="Keterangan" />
             <TextInput
@@ -129,6 +177,38 @@ const CreateIncome = () => {
               value={form.keterangan}
               onChange={handleChange}
             />
+          </div>
+          <div>
+            <Label htmlFor="nomorNota" value="Nomor Nota" />
+            <TextInput
+              id="kodeNota"
+              name="kodeNota"
+              placeholder="Nomor Nota"
+              value={form.kodeNota}
+              onChange={handleChange}
+            />
+            {form.nota && (
+              <div className="relative">
+                <img
+                  src={form.nota}
+                  alt="Preview"
+                  style={{ width: "200px" }}
+                  className="mt-2 h-auto border rounded shadow-lg"
+                />
+                <button
+                  onClick={handleCancelImage}
+                  className="absolute top-2 right-4 bg-red-700 text-white py-1 px-2 font-bold rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+          <div>
+            <Label className="mb-2 block" htmlFor="file-upload">
+              Upload Nota
+            </Label>
+            <FileInput id="nota" name="nota" onChange={handleUploadImage} />
           </div>
 
           <div className="md:col-span-2 text-right">
