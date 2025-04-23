@@ -1,7 +1,6 @@
 // services/incomeService.ts
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const token = () => {
   if (typeof window !== "undefined") {
@@ -9,16 +8,6 @@ const token = () => {
   }
   return null;
 };
-
-interface CreateIncome {
-  date: string;
-  funds: number;
-  detail: string;
-  incomeTypeId: number;
-  incomeTypeName: string;
-  description: string;
-  code: string;
-}
 
 interface CreateIncomeType {
   incomeTypeName: string;
@@ -52,18 +41,37 @@ export const getIncomeType = async (): Promise<string[]> => {
   return json.data.incomeType; // pastikan return ini array
 };
 
-export const createIncome = async (data: CreateIncome): Promise<any> => {
+export async function createIncome(data: any) {
+  const formData = new FormData();
+
+  formData.append("detail", data.detail);
+  formData.append("funds", data.funds);
+  formData.append("billNumber", data.billNumber);
+  formData.append("date", data.date);
+  formData.append("spendingTypeId", data.incomeTypeId);
+  formData.append("code", data.code);
+  formData.append("description", data.description);
+  formData.append("spendingTypeName", data.incomeTypeName);
+
+  if (data.bill instanceof File) {
+    formData.append("bill", data.bill); // untuk upload file
+  }
+
   const res = await fetch(`${API_BASE}/api/churchincome/create`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `${token()}`,
     },
-    body: JSON.stringify(data),
+    body: formData,
   });
-  if (!res.ok) throw new Error("Gagal menyimpan pemasukan");
-  return res.json();
-};
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || "Gagal menyimpan pemasukan");
+  }
+
+  return await res.json();
+}
 
 export const deleteIncome = async (id: number): Promise<any> => {
   const res = await fetch(`${API_BASE}/api/churchincome/delete/${id}`, {

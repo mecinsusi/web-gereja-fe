@@ -64,7 +64,7 @@ export function NavbarSection() {
                   );
                 }}
               >
-                <Sidebar.Item href="/church">Laporan Keuangan</Sidebar.Item>
+                <Sidebar.Item href="/church">Transaksi Kas Harian</Sidebar.Item>
                 <Sidebar.Item href="/church/income">Pemasukan</Sidebar.Item>
                 <Sidebar.Item href="/church/spending">Pengeluaran</Sidebar.Item>
               </Sidebar.Collapse>

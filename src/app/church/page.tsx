@@ -12,21 +12,6 @@ const ChurchReport = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const month = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
   // Fetch data saat pertama kali render
   useEffect(() => {
     getFinance()
@@ -120,7 +105,7 @@ const ChurchReport = () => {
       "Tanggal",
       "Kode Akun",
       "Keterangan",
-      "Debet",
+      "Debit",
       "Kredit",
     ];
     const rows = formattedFinanceList.map((item: any, index: number) => [
@@ -145,7 +130,7 @@ const ChurchReport = () => {
 
     //Tambahkan kop atau judul laporan
     const kop = [
-      ["LAPORAN KEUANGAN"],
+      ["TRANSAKSI KAS HARIAN"],
       ["BULAN TAHUN"],
       ['PAROKI "MARIA BUNDA KARMEL" KASONGAN'],
       [], // baris kosong sebelum header
@@ -223,7 +208,7 @@ const ChurchReport = () => {
           <Table.HeadCell>Tanggal</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
-          <Table.HeadCell>Debet</Table.HeadCell>
+          <Table.HeadCell>Debit</Table.HeadCell>
           <Table.HeadCell>Kredit</Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">

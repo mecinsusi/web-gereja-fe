@@ -58,7 +58,9 @@ const IncomeList = () => {
           <Table.HeadCell>Tanggal</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
-          <Table.HeadCell>Kredit</Table.HeadCell>
+          <Table.HeadCell>Debit</Table.HeadCell>
+          <Table.HeadCell>Nomor Nota</Table.HeadCell>
+          <Table.HeadCell>Nota</Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           {incomeList?.map((item: any, index) => (
@@ -77,13 +79,19 @@ const IncomeList = () => {
                 {item.detail}
               </Table.Cell>
               <Table.Cell>{item.funds.toLocaleString()}</Table.Cell>
-              <Table.Cell className="space-x-4">
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
+              <Table.Cell>{item.billNumber}</Table.Cell>
+              <Table.Cell>
+                {item.bill ? (
+                  <a href={item.bill} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={item.bill} // Menggunakan URL gambar yang sudah diberi otentikasi
+                      alt="Nota"
+                      className="h-16 w-auto object-contain border rounded"
+                    />
+                  </a>
+                ) : (
+                  <span className="text-gray-500 italic">-</span>
+                )}
               </Table.Cell>
             </Table.Row>
           ))}

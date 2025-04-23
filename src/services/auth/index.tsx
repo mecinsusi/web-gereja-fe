@@ -1,12 +1,13 @@
 // services/authService.ts
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface LoginData {
   email: string;
   password: string;
 }
+
 export const login = async (data: LoginData): Promise<{ token: string }> => {
   console.log("API BASE =", process.env.NEXT_PUBLIC_API_BASE_URL);
   const res = await fetch(`${API_BASE}/api/authentication/login`, {
