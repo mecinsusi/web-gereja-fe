@@ -9,10 +9,16 @@ const token = () => {
   return null;
 };
 
-interface CreateIncomeType {
-  incomeTypeName: string;
+interface CreateIncomeCode {
+  incomeCodeName: string;
   description: string;
   code: string;
+}
+
+export enum Type {
+  CHURCH = "CHURCH",
+  STORE = "STORE",
+  FARM = "FARM",
 }
 
 export const getIncome = async (): Promise<string[]> => {
@@ -28,8 +34,8 @@ export const getIncome = async (): Promise<string[]> => {
   return json.data.income; // pastikan return ini array
 };
 
-export const getIncomeType = async (): Promise<string[]> => {
-  const res = await fetch(`${API_BASE}/api/churchincometype`, {
+export const getIncomeCode = async (): Promise<string[]> => {
+  const res = await fetch(`${API_BASE}/api/churchincomecode`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -38,7 +44,11 @@ export const getIncomeType = async (): Promise<string[]> => {
   });
   if (!res.ok) throw new Error("Gagal mengambil data kode akun pemasukan");
   const json = await res.json();
-  return json.data.incomeType; // pastikan return ini array
+  return json.data.incomeCode; // pastikan return ini array
+};
+
+export const getBillImageUrl = (filename: string) => {
+  return `${API_BASE}/${filename}`;
 };
 
 export async function createIncome(data: any) {
@@ -48,10 +58,11 @@ export async function createIncome(data: any) {
   formData.append("funds", data.funds);
   formData.append("billNumber", data.billNumber);
   formData.append("date", data.date);
-  formData.append("spendingTypeId", data.incomeTypeId);
+  formData.append("incomeCodeId", data.incomeCodeId);
   formData.append("code", data.code);
+  formData.append("fundsType", data.fundsType);
   formData.append("description", data.description);
-  formData.append("spendingTypeName", data.incomeTypeName);
+  formData.append("incomeCodeName", data.incomeCodeName);
 
   if (data.bill instanceof File) {
     formData.append("bill", data.bill); // untuk upload file
@@ -86,10 +97,10 @@ export const deleteIncome = async (id: number): Promise<any> => {
   return res.json();
 };
 
-export const createIncomeType = async (
-  data: CreateIncomeType,
+export const createIncomeCode = async (
+  data: CreateIncomeCode,
 ): Promise<any> => {
-  const res = await fetch(`${API_BASE}/api/churchincometype/create`, {
+  const res = await fetch(`${API_BASE}/api/churchincomecode/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -101,8 +112,8 @@ export const createIncomeType = async (
   return res.json();
 };
 
-export const deleteIncomeType = async (id: number): Promise<any> => {
-  const res = await fetch(`${API_BASE}/api/churchincometype/delete/${id}`, {
+export const deleteIncomeCode = async (id: number): Promise<any> => {
+  const res = await fetch(`${API_BASE}/api/churchincomecode/delete/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

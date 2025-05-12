@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Avatar, Dropdown, Navbar, Sidebar } from "flowbite-react";
 import {
+  HiChartPie,
   HiMenu,
   HiOutlineMinusSm,
   HiOutlinePlusSm,
-  HiChartPie,
 } from "react-icons/hi";
-import { PiFarmFill, PiChurchFill, PiStorefrontFill } from "react-icons/pi";
+import { PiChurchFill } from "react-icons/pi";
 import { twMerge } from "tailwind-merge";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +43,7 @@ export function NavbarSection() {
         <Sidebar aria-label="Sidebar with logo branding example">
           <Sidebar.Items>
             <Sidebar.ItemGroup>
-              <Sidebar.Item href="/" icon={HiChartPie}>
+              <Sidebar.Item href="/finance" icon={HiChartPie}>
                 Dashboard
               </Sidebar.Item>
               <Sidebar.Collapse
@@ -68,54 +68,9 @@ export function NavbarSection() {
                 <Sidebar.Item href="/church/income">Pemasukan</Sidebar.Item>
                 <Sidebar.Item href="/church/spending">Pengeluaran</Sidebar.Item>
               </Sidebar.Collapse>
-              <Sidebar.Collapse
-                icon={PiStorefrontFill}
-                label="Toko"
-                renderChevronIcon={(theme, open) => {
-                  const IconComponent = open
-                    ? HiOutlineMinusSm
-                    : HiOutlinePlusSm;
-
-                  return (
-                    <IconComponent
-                      aria-hidden
-                      className={twMerge(
-                        theme.label.icon.open[open ? "on" : "off"],
-                      )}
-                    />
-                  );
-                }}
-              >
-                <Sidebar.Item href="/store">Laporan Keuangan</Sidebar.Item>
-                <Sidebar.Item href="/store/income">Pemasukan</Sidebar.Item>
-                <Sidebar.Item href="/store/spending">Pengeluaran</Sidebar.Item>
-              </Sidebar.Collapse>
-              <Sidebar.Collapse
-                icon={PiFarmFill}
-                label="Peternakan"
-                renderChevronIcon={(theme, open) => {
-                  const IconComponent = open
-                    ? HiOutlineMinusSm
-                    : HiOutlinePlusSm;
-
-                  return (
-                    <IconComponent
-                      aria-hidden
-                      className={twMerge(
-                        theme.label.icon.open[open ? "on" : "off"],
-                      )}
-                    />
-                  );
-                }}
-              >
-                <Sidebar.Item href="/farm">Laporan Keuangan</Sidebar.Item>
-                <Sidebar.Item href="/farm/income">Pemasukan</Sidebar.Item>
-                <Sidebar.Item href="/farm/spending">Pengeluaran</Sidebar.Item>
-              </Sidebar.Collapse>
             </Sidebar.ItemGroup>
           </Sidebar.Items>
         </Sidebar>
-        l
       </div>
 
       {/* Navbar + Content */}

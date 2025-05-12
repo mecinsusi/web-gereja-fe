@@ -3,20 +3,22 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { Button, FileInput, Label, TextInput, Select } from "flowbite-react";
-import SpendingCodeAccount from "../../spendingtype/page";
-import { createSpending, getSpendingType } from "@/services/church/spending";
+import SpendingCodeAccount from "../../spendingcode/page";
+import { createSpending, getSpendingCode } from "@/services/church/spending";
+import { Type } from "@/services/church/income";
 
-interface SpendingType {
+interface SpendingCode {
   id: number;
-  spendingTypeName: string;
+  spendingCodeName: string;
   code: string;
   description: string;
   bill: string;
   billNumber: string;
+  fundsType: Type;
 }
 
 const CreateSpending = () => {
-  const [spendingTypeList, setSpendingTypeList] = useState<SpendingType[]>([]);
+  const [spendingCodeList, setSpendingCodeList] = useState<SpendingCode[]>([]);
   const [notaFile, setNotaFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     tanggal: "",
@@ -25,12 +27,13 @@ const CreateSpending = () => {
     keterangan: "",
     kodeNota: "",
     nota: "",
+    kategoriDana: "",
   });
 
   useEffect(() => {
-    getSpendingType()
-      .then((data: any) => setSpendingTypeList(data))
-      .catch((err) => console.error("Error fetching spending types:", err));
+    getSpendingCode()
+      .then((data: any) => setSpendingCodeList(data))
+      .catch((err) => console.error("Error fetching spending code:", err));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +44,10 @@ const CreateSpending = () => {
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setForm((prev) => ({ ...prev, kodeAkun: value }));
+  };
+
+  const handleSelectTypeChange = (value: string) => {
+    setForm((prev) => ({ ...prev, kategoriDana: value as Type }));
   };
 
   // Handle upload image
@@ -78,7 +85,7 @@ const CreateSpending = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const selectedAccount = spendingTypeList.find(
+    const selectedAccount = spendingCodeList.find(
       (acc) => acc.code === form.kodeAkun,
     );
 
@@ -91,15 +98,16 @@ const CreateSpending = () => {
     }
 
     const payload = {
+      fundsType: form.kategoriDana,
       detail: form.keterangan,
       funds: parseFloat(form.kredit),
       bill: notaFile, // kirim file, bukan blob URL
       billNumber: form.kodeNota,
-      date: new Date(form.tanggal).toISOString(),
-      spendingTypeId: selectedAccount.id,
+      spendingCodeId: selectedAccount.id,
       code: selectedAccount.code,
       description: selectedAccount.description,
-      spendingTypeName: selectedAccount.spendingTypeName,
+      spendingCodeName: selectedAccount.spendingCodeName,
+      date: new Date(form.tanggal).toISOString(),
     };
 
     try {
@@ -113,6 +121,7 @@ const CreateSpending = () => {
         keterangan: "",
         nota: "",
         kodeNota: "",
+        kategoriDana: "",
       });
       setNotaFile(null); // reset file
     } catch (error) {
@@ -135,6 +144,21 @@ const CreateSpending = () => {
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           <div>
+            <Label htmlFor="kategoriDana" value="Kategori Dana" />
+            <Select
+              id="kategoriDana"
+              name="kategoriDana"
+              required
+              value={form.kategoriDana}
+              onChange={(e) => handleSelectTypeChange(e.target.value)}
+            >
+              <option value="">-- Pilih Kategori Dana --</option>
+              <option value={Type.CHURCH}>GEREJA</option>
+              <option value={Type.STORE}>TOKO</option>
+              <option value={Type.FARM}>PETERNAKAN</option>
+            </Select>
+          </div>
+          <div>
             <Label htmlFor="tanggal" value="Tanggal" />
             <TextInput
               id="tanggal"
@@ -155,9 +179,9 @@ const CreateSpending = () => {
               onChange={handleSelectChange}
             >
               <option value="">-- Pilih Kode Akun --</option>
-              {spendingTypeList?.map((akun) => (
+              {spendingCodeList?.map((akun) => (
                 <option key={akun.id} value={akun.code}>
-                  {akun.code} - {akun.spendingTypeName}
+                  {akun.code} - {akun.spendingCodeName}
                 </option>
               ))}
             </Select>

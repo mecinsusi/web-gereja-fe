@@ -2,20 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { Button, Label, TextInput, Select, FileInput } from "flowbite-react";
-import IncomeCodeAccount from "../../incometype/page";
-import { createIncome, getIncomeType } from "@/services/church/income";
+import IncomeCodeAccount from "../../incomecode/page";
+import { createIncome, Type, getIncomeCode } from "@/services/church/income";
 
-interface IncomeType {
+interface IncomeCode {
   id: number;
-  incomeTypeName: string;
+  incomeCodeName: string;
   code: string;
   description: string;
   bill: string;
   billNumber: string;
+  fundsType: Type;
 }
 
 const CreateIncome = () => {
-  const [incomeTypeList, setIncomeTypeList] = useState<IncomeType[]>([]);
+  const [incomeCodeList, setIncomeCodeList] = useState<IncomeCode[]>([]);
   const [notaFile, setNotaFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     tanggal: "",
@@ -24,12 +25,13 @@ const CreateIncome = () => {
     keterangan: "",
     kodeNota: "",
     nota: "",
+    kategoriDana: "",
   });
 
   useEffect(() => {
-    getIncomeType()
-      .then((data: any) => setIncomeTypeList(data))
-      .catch((err) => console.error("Error fetching income types:", err));
+    getIncomeCode()
+      .then((data: any) => setIncomeCodeList(data))
+      .catch((err) => console.error("Error fetching income code:", err));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,6 +42,10 @@ const CreateIncome = () => {
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setForm((prev) => ({ ...prev, kodeAkun: value }));
+  };
+
+  const handleSelectTypeChange = (value: string) => {
+    setForm((prev) => ({ ...prev, kategoriDana: value as Type }));
   };
 
   // Handle upload image
@@ -77,7 +83,7 @@ const CreateIncome = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const selectedAccount = incomeTypeList.find(
+    const selectedAccount = incomeCodeList.find(
       (acc) => acc.code === form.kodeAkun,
     );
     console.log(selectedAccount);
@@ -89,14 +95,15 @@ const CreateIncome = () => {
     }
 
     const payload = {
+      fundsType: form.kategoriDana,
       detail: form.keterangan,
       funds: parseFloat(form.debit),
       bill: notaFile,
       billNumber: form.kodeNota,
-      incomeTypeId: selectedAccount.id,
+      incomeCodeId: selectedAccount.id,
       code: selectedAccount.code,
       description: selectedAccount.description,
-      incomeTypeName: selectedAccount.incomeTypeName,
+      incomeCodeName: selectedAccount.incomeCodeName,
       date: new Date(form.tanggal).toISOString(),
     };
 
@@ -110,6 +117,7 @@ const CreateIncome = () => {
         debit: "",
         keterangan: "",
         nota: "",
+        kategoriDana: "",
         kodeNota: "",
       });
       setNotaFile(null);
@@ -132,6 +140,21 @@ const CreateIncome = () => {
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           <div>
+            <Label htmlFor="kategoriDana" value="Kategori Dana" />
+            <Select
+              id="kategoriDana"
+              name="kategoriDana"
+              required
+              value={form.kategoriDana}
+              onChange={(e) => handleSelectTypeChange(e.target.value)}
+            >
+              <option value="">-- Pilih Kategori Dana --</option>
+              <option value={Type.CHURCH}>GEREJA</option>
+              <option value={Type.STORE}>TOKO</option>
+              <option value={Type.FARM}>PETERNAKAN</option>
+            </Select>
+          </div>
+          <div>
             <Label htmlFor="tanggal" value="Tanggal" />
             <TextInput
               id="tanggal"
@@ -152,9 +175,9 @@ const CreateIncome = () => {
               onChange={handleSelectChange}
             >
               <option value="">-- Pilih Kode Akun --</option>
-              {incomeTypeList?.map((akun) => (
+              {incomeCodeList?.map((akun) => (
                 <option key={akun.id} value={akun.code}>
-                  {akun.code} - {akun.incomeTypeName}
+                  {akun.code} - {akun.incomeCodeName}
                 </option>
               ))}
             </Select>

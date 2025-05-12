@@ -11,6 +11,7 @@ const ChurchReport = () => {
   const [filteredFinanceList, setFilteredFinanceList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [accountCodeFilter, setAccountCodeFilter] = useState("");
 
   // Fetch data saat pertama kali render
   useEffect(() => {
@@ -57,20 +58,31 @@ const ChurchReport = () => {
 
   // Fungsi untuk mengaplikasikan filter berdasarkan tanggal
   const applyDateFilter = () => {
-    if (!startDate || !endDate) {
-      setFilteredFinanceList(financeList); // jika filter kosong, tampilkan semua data
-      return;
+    let filtered = [...financeList];
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      filtered = filtered.filter((item: any) => {
+        const itemDate = new Date(item.date);
+        return itemDate >= start && itemDate <= end;
+      });
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    const filtered = financeList.filter((item: any) => {
-      const itemDate = new Date(item.date);
-      return itemDate >= start && itemDate <= end;
-    });
+    if (accountCodeFilter) {
+      filtered = filtered.filter((item: any) =>
+        item.code?.toLowerCase().includes(accountCodeFilter.toLowerCase()),
+      );
+    }
 
     setFilteredFinanceList(filtered);
+  };
+  //Reset
+  const resetFilter = () => {
+    setStartDate("");
+    setEndDate("");
+    setAccountCodeFilter("");
+    setFilteredFinanceList(financeList);
   };
 
   // Menentukan bulan yang ditampilkan pada header
@@ -130,7 +142,7 @@ const ChurchReport = () => {
 
     //Tambahkan kop atau judul laporan
     const kop = [
-      ["TRANSAKSI KAS HARIAN"],
+      ["LAPORAN KEUANGAN"],
       ["BULAN TAHUN"],
       ['PAROKI "MARIA BUNDA KARMEL" KASONGAN'],
       [], // baris kosong sebelum header
@@ -149,7 +161,7 @@ const ChurchReport = () => {
     <div className="flex flex-col overflow-x-auto">
       <div className="flex py-4 mx-2">
         <div className="text-center text-lg uppercase font-bold items-center mx-auto pt-4 pb-8">
-          <h1>Laporan Keuangan</h1>
+          <h1>Transaksi Kas Harian</h1>
           <h2>{getDisplayMonth()}</h2>
           <h3>PAROKI "MARIA BUNDA KARMEL" KASONGAN</h3>
         </div>
@@ -191,9 +203,30 @@ const ChurchReport = () => {
             className="border p-2 rounded-md text-sm"
           />
         </div>
+        <div className="space-y-2 text-sm">
+          <label htmlFor="end" className="block font-bold">
+            Kode Akun
+          </label>
+          <select
+            id="accountCode"
+            value={accountCodeFilter}
+            onChange={(e) => setAccountCodeFilter(e.target.value)}
+            className="border p-2 rounded-md text-sm w-20"
+          >
+            <option value="">Semua</option>
+            {[...new Set(financeList.map((item) => item.code))].map((code) => (
+              <option key={code} value={code}>
+                {code}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex p-2 space-x-6 mt-4 text-sm">
           <Button color="purple" onClick={applyDateFilter}>
             Terapkan Filter
+          </Button>
+          <Button color="gray" onClick={resetFilter}>
+            Reset
           </Button>
           <Button color="blue" onClick={handleExport}>
             Download CSV
