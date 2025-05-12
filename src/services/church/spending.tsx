@@ -8,8 +8,8 @@ const token = () => {
   return null;
 };
 
-interface CreateSpendingType {
-  spendingTypeName: string;
+interface CreateSpendingCode {
+  spendingCodeName: string;
   description: string;
   code: string;
 }
@@ -27,9 +27,8 @@ export const getSpending = async (): Promise<string[]> => {
   return json.data.spending; // pastikan return ini array
 };
 
-
-export const getSpendingType = async (): Promise<string[]> => {
-  const res = await fetch(`${API_BASE}/api/churchspendingtype`, {
+export const getSpendingCode = async (): Promise<string[]> => {
+  const res = await fetch(`${API_BASE}/api/churchspendingcode`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -38,7 +37,7 @@ export const getSpendingType = async (): Promise<string[]> => {
   });
   if (!res.ok) throw new Error("Gagal mengambil data kode akun pengeluaran");
   const json = await res.json();
-  return json.data.spendingType; // pastikan return ini array
+  return json.data.spendingCode; // pastikan return ini array
 };
 
 export async function createSpending(data: any) {
@@ -48,10 +47,11 @@ export async function createSpending(data: any) {
   formData.append("funds", data.funds);
   formData.append("billNumber", data.billNumber);
   formData.append("date", data.date);
-  formData.append("spendingTypeId", data.spendingTypeId);
+  formData.append("spendingCodeId", data.spendingCodeId);
   formData.append("code", data.code);
   formData.append("description", data.description);
-  formData.append("spendingTypeName", data.spendingTypeName);
+  formData.append("fundsType", data.fundsType);
+  formData.append("spendingCodeName", data.spendingCodeName);
 
   if (data.bill instanceof File) {
     formData.append("bill", data.bill); // untuk upload file
@@ -104,10 +104,10 @@ export const deleteSpending = async (id: number): Promise<any> => {
   return res.json();
 };
 
-export const createSpendingType = async (
-  data: CreateSpendingType,
+export const createSpendingCode = async (
+  data: CreateSpendingCode,
 ): Promise<any> => {
-  const res = await fetch(`${API_BASE}/api/churchspendingtype/create`, {
+  const res = await fetch(`${API_BASE}/api/churchspendingcode/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -119,8 +119,8 @@ export const createSpendingType = async (
   return res.json();
 };
 
-export const deleteSpendingType = async (id: number): Promise<any> => {
-  const res = await fetch(`${API_BASE}/api/churchspendingtype/delete/${id}`, {
+export const deleteSpendingCode = async (id: number): Promise<any> => {
+  const res = await fetch(`${API_BASE}/api/churchspendingcode/delete/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

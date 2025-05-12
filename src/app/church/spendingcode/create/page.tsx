@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { Button, Label, TextInput } from "flowbite-react";
-import IncomeCodeAccount from "../page";
-import { createIncomeType } from "@/services/church/income";
+import SpendingCodeAccount from "../page";
+import { createSpendingCode } from "@/services/church/spending";
 
-const CreateIncomeType = () => {
+const CreateSpendingCode = () => {
   const [form, setForm] = useState({
     kodeAkun: "",
     keterangan: "",
@@ -22,12 +22,12 @@ const CreateIncomeType = () => {
 
     // Logic untuk simpan ke backend di sini
     const payload = {
-      incomeTypeName: form.keterangan,
+      spendingCodeName: form.keterangan,
       description: form.deskripsi,
       code: form.kodeAkun,
     };
     try {
-      await createIncomeType(payload);
+      await createSpendingCode(payload);
       alert("Kode akun berhasil disimpan");
       setForm({
         kodeAkun: "",
@@ -43,10 +43,10 @@ const CreateIncomeType = () => {
   return (
     <div className="flex flex-col-2 p-4 gap-12 w-full">
       <div className="w-1/2 mx-auto mt-10 p-6 bg-white shadow rounded-lg">
-        <IncomeCodeAccount />
+        <SpendingCodeAccount />
       </div>
       <div className="w-1/2 mx-auto mt-10 p-6 bg-white shadow rounded-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Input Pemasukan</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Input Pengeluaran</h2>
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -96,4 +96,4 @@ const CreateIncomeType = () => {
   );
 };
 
-export default CreateIncomeType;
+export default CreateSpendingCode;
