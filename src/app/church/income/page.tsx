@@ -3,13 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { Button, Table } from "flowbite-react";
 import { ButtonGroup } from "@/components/button";
-import { getIncome, deleteIncome } from "@/services/church/income";
+import { getIncome, deleteIncome, FundsTypeLabel } from "@/services/church/income";
 
-export enum FundsTypeLabel {
-  CHURCH = "Gereja",
-  STORE = "Toko",
-  FARM = "Peternakan",
-}
 
 const IncomeList = () => {
   const [incomeList, setIncomeList] = useState<any[]>([]);

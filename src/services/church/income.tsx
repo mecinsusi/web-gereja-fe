@@ -9,6 +9,12 @@ const token = () => {
   return null;
 };
 
+export enum FundsTypeLabel {
+  CHURCH = "Gereja",
+  STORE = "Toko",
+  FARM = "Peternakan",
+}
+
 interface CreateIncomeCode {
   incomeCodeName: string;
   description: string;
