@@ -3,8 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Table } from "flowbite-react";
 import { ButtonGroup } from "@/components/button";
-import { getIncome, deleteIncome, FundsTypeLabel } from "@/services/church/income";
-
+import {
+  getIncome,
+  deleteIncome,
+  FundsTypeLabel,
+} from "@/services/church/income";
 
 const IncomeList = () => {
   const [incomeList, setIncomeList] = useState<any[]>([]);

@@ -4,8 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Table } from "flowbite-react";
 import { ButtonGroup } from "@/components/button";
 import { getSpending, deleteSpending } from "@/services/church/spending";
-import { FundsTypeLabel } from "../income/page";
-import { getBillImageUrl } from "@/services/church/income";
+import { FundsTypeLabel, getBillImageUrl } from "@/services/church/income";
 
 const SpendingList = () => {
   const [spendingList, setSpendingList] = useState<any[]>([]);
