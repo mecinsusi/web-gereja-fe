@@ -7,6 +7,7 @@ import {
   getIncome,
   deleteIncome,
   FundsTypeLabel,
+  getBillImageUrl,
 } from "@/services/church/income";
 
 const IncomeList = () => {
@@ -214,9 +215,13 @@ const IncomeList = () => {
               <Table.Cell>{item.billNumber}</Table.Cell>
               <Table.Cell>
                 {item.bill ? (
-                  <a href={item.bill} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={getBillImageUrl(item.bill)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <img
-                      src={item.bill}
+                      src={getBillImageUrl(item.bill)}
                       alt="Nota"
                       className="h-16 w-auto object-contain border rounded"
                     />
