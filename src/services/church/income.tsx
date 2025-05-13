@@ -54,7 +54,7 @@ export const getIncomeCode = async (): Promise<string[]> => {
 };
 
 export const getBillImageUrl = (filename: string) => {
-  return `${API_BASE}/${filename}`;
+  return `${API_BASE}/uploads/${filename}`;
 };
 
 export async function createIncome(data: any) {
