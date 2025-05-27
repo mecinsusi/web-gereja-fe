@@ -16,6 +16,7 @@ const IncomeList = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [accountCodeFilter, setAccountCodeFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("");
 
   const totalCredit = filteredIncomeList.reduce(
     (sum, item) => sum + item.funds,
@@ -27,16 +28,16 @@ const IncomeList = () => {
       .then((data) => {
         setIncomeList(data);
 
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
+        // Filter data untuk hari ini
+        const today = new Date();
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(today);
+        todayEnd.setHours(23, 59, 59, 999);
 
         const filtered = data.filter((item: any) => {
           const itemDate = new Date(item.date);
-          return (
-            itemDate.getMonth() === currentMonth &&
-            itemDate.getFullYear() === currentYear
-          );
+          return itemDate >= todayStart && itemDate <= todayEnd;
         });
 
         setFilteredIncomeList(filtered);
@@ -69,22 +70,42 @@ const IncomeList = () => {
       });
     }
 
-    if (accountCodeFilter) {
+    if (accountCodeFilter.length > 0) {
       filtered = filtered.filter((item: any) =>
-        item.churchIncomeCodeIdRel?.code
+        item.churchIncomeCodeIdRel?.code?.toLowerCase(),
+      );
+    }
+
+    if (userFilter) {
+      filtered = filtered.filter((item: any) =>
+        item.churchIncomeCreateByRel?.userName
           ?.toLowerCase()
-          .includes(accountCodeFilter.toLowerCase()),
+          .includes(userFilter.toLowerCase()),
       );
     }
 
     setFilteredIncomeList(filtered);
   };
 
+  const filterToday = (data: any[]) => {
+    const today = new Date();
+    return data.filter((item) => {
+      const d = new Date(item.date);
+      return (
+        d.getDate() === today.getDate() &&
+        d.getMonth() === today.getMonth() &&
+        d.getFullYear() === today.getFullYear()
+      );
+    });
+  };
+
   const resetFilter = () => {
     setStartDate("");
     setEndDate("");
     setAccountCodeFilter("");
-    setFilteredIncomeList(incomeList);
+    setUserFilter("");
+
+    setFilteredIncomeList(filterToday(incomeList));
   };
 
   const getDisplayMonth = () => {
@@ -154,25 +175,49 @@ const IncomeList = () => {
           />
         </div>
         <div className="space-y-2 text-sm">
-          <label htmlFor="accountCode" className="block font-bold">
+          <label htmlFor="end" className="block font-bold">
             Kode Akun
           </label>
           <select
             id="accountCode"
             value={accountCodeFilter}
             onChange={(e) => setAccountCodeFilter(e.target.value)}
-            className="border p-2 rounded-md text-sm w-24"
+            className="border p-2 rounded-md text-sm w-20"
           >
             <option value="">Semua</option>
             {[
               ...new Set(
                 incomeList.map((item) => item.churchIncomeCodeIdRel?.code),
               ),
+            ].map((code) => (
+              <option key={code} value={code}>
+                {code}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2 text-sm">
+          <label htmlFor="userName" className="block font-bold">
+            Nama Admin
+          </label>
+          <select
+            id="userName"
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="border p-2 rounded-md text-sm w-24"
+          >
+            <option value="">Semua</option>
+            {[
+              ...new Set(
+                incomeList.map(
+                  (item) => item.churchIncomeCreateByRel?.userName,
+                ),
+              ),
             ]
               .filter(Boolean)
-              .map((kode) => (
-                <option key={kode} value={kode}>
-                  {kode}
+              .map((user) => (
+                <option key={user} value={user}>
+                  {user}
                 </option>
               ))}
           </select>
@@ -191,20 +236,24 @@ const IncomeList = () => {
         <Table.Head>
           <Table.HeadCell>No</Table.HeadCell>
           <Table.HeadCell>Tanggal</Table.HeadCell>
+          <Table.HeadCell>Nama Admin</Table.HeadCell>
           <Table.HeadCell>Kategori Dana</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
           <Table.HeadCell>Debit</Table.HeadCell>
           <Table.HeadCell>Nomor Nota</Table.HeadCell>
           <Table.HeadCell>Nota</Table.HeadCell>
-          <Table.HeadCell>Aksi</Table.HeadCell>
+          <Table.HeadCell></Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           {filteredIncomeList.map((item: any, index) => (
             <Table.Row key={item.id}>
               <Table.Cell>{index + 1}</Table.Cell>
               <Table.Cell>
-                {new Date(item.createAt).toLocaleDateString("id-ID")}
+                {new Date(item.date).toLocaleDateString("id-ID")}
+              </Table.Cell>
+              <Table.Cell>
+                {item.churchIncomeCreateByRel?.userName || "-"}
               </Table.Cell>
               <Table.Cell>
                 {FundsTypeLabel[item.fundsType as keyof typeof FundsTypeLabel]}
@@ -241,7 +290,7 @@ const IncomeList = () => {
             </Table.Row>
           ))}
           <Table.Row className="bg-gray-100 font-semibold">
-            <Table.Cell colSpan={5} className="text-right">
+            <Table.Cell colSpan={6} className="text-right">
               Jumlah
             </Table.Cell>
             <Table.Cell>{totalCredit.toLocaleString("id-ID")}</Table.Cell>

@@ -12,6 +12,7 @@ const SpendingList = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [accountCodeFilter, setAccountCodeFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("");
 
   const totalDebit = filteredSpendingList.reduce(
     (sum, item: any) => sum + item.funds,
@@ -23,16 +24,16 @@ const SpendingList = () => {
       .then((data) => {
         setSpendingList(data);
 
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
+        // Filter data untuk hari ini
+        const today = new Date();
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(today);
+        todayEnd.setHours(23, 59, 59, 999);
 
         const filtered = data.filter((item: any) => {
           const itemDate = new Date(item.date);
-          return (
-            itemDate.getMonth() === currentMonth &&
-            itemDate.getFullYear() === currentYear
-          );
+          return itemDate >= todayStart && itemDate <= todayEnd;
         });
 
         setFilteredSpendingList(filtered);
@@ -67,9 +68,17 @@ const SpendingList = () => {
 
     if (accountCodeFilter) {
       filtered = filtered.filter((item: any) =>
-        item.churchIncomeCodeIdRel?.code
+        item.churchSpendingCodeIdRel?.code
           ?.toLowerCase()
           .includes(accountCodeFilter.toLowerCase()),
+      );
+    }
+
+    if (userFilter) {
+      filtered = filtered.filter((item: any) =>
+        item.churchSpendingCreateByRel?.userName
+          ?.toLowerCase()
+          .includes(userFilter.toLowerCase()),
       );
     }
 
@@ -173,6 +182,32 @@ const SpendingList = () => {
               ))}
           </select>
         </div>
+        <div className="space-y-2 text-sm">
+          <label htmlFor="userFilter" className="block font-bold">
+            Nama Admin
+          </label>
+          <select
+            id="userFilter"
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="border p-2 rounded-md text-sm w-24"
+          >
+            <option value="">Semua</option>
+            {[
+              ...new Set(
+                spendingList.map(
+                  (item) => item.churchSpendingCreateByRel?.userName,
+                ),
+              ),
+            ]
+              .filter(Boolean)
+              .map((user) => (
+                <option key={user} value={user}>
+                  {user}
+                </option>
+              ))}
+          </select>
+        </div>
         <div className="flex space-x-2 text-sm">
           <Button color="purple" onClick={applyDateFilter}>
             Terapkan Filter
@@ -187,6 +222,7 @@ const SpendingList = () => {
         <Table.Head>
           <Table.HeadCell>No</Table.HeadCell>
           <Table.HeadCell>Tanggal</Table.HeadCell>
+          <Table.HeadCell>Nama Admin</Table.HeadCell>
           <Table.HeadCell>Kategori Dana</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
@@ -203,12 +239,17 @@ const SpendingList = () => {
             >
               <Table.Cell>{index + 1}</Table.Cell>
               <Table.Cell>
-                {new Date(item.createAt).toLocaleDateString()}
+                {new Date(item.date).toLocaleDateString()}
+              </Table.Cell>
+              <Table.Cell>
+                {item.churchSpendingCreateByRel?.userName || "-"}
               </Table.Cell>
               <Table.Cell>
                 {FundsTypeLabel[item.fundsType as keyof typeof FundsTypeLabel]}
               </Table.Cell>
-              <Table.Cell>{item.churchSpendingCodeIdRel.code}</Table.Cell>
+              <Table.Cell>
+                {item.churchSpendingCodeIdRel?.code || "-"}
+              </Table.Cell>
               <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                 {item.detail}
               </Table.Cell>
@@ -246,7 +287,7 @@ const SpendingList = () => {
               Jumlah
             </Table.Cell>
             <Table.Cell>{totalDebit.toLocaleString()}</Table.Cell>
-            <Table.Cell colSpan={2}></Table.Cell>
+            <Table.Cell colSpan={3}></Table.Cell>
           </Table.Row>
         </Table.Body>
       </Table>
