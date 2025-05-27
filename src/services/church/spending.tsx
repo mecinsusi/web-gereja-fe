@@ -73,24 +73,6 @@ export async function createSpending(data: any) {
   return await res.json();
 }
 
-export const uploadNotaImage = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await fetch(`${API_BASE}/api/churchspending/upload`, {
-    method: "POST",
-    headers: {
-      Authorization: `${token()}`,
-    },
-    body: formData,
-  });
-
-  if (!res.ok) throw new Error("Gagal upload gambar nota");
-
-  const data = await res.json();
-  return data.url; // Ini yang akan disimpan ke form.nota
-};
-
 export const deleteSpending = async (id: number): Promise<any> => {
   const res = await fetch(`${API_BASE}/api/churchspending/delete/${id}`, {
     method: "DELETE",

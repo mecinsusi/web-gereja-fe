@@ -5,13 +5,15 @@ import { Button, Table } from "flowbite-react";
 import { ButtonGroup } from "@/components/button";
 import { getFinance } from "@/services/church/report";
 import { exportToCSV } from "@/utils/export";
+import AccountCodeDropdown from "@/components/dropDown";
 
 const ChurchReport = () => {
   const [financeList, setFinanceList] = useState<any[]>([]);
   const [filteredFinanceList, setFilteredFinanceList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [accountCodeFilter, setAccountCodeFilter] = useState("");
+  const [accountCodeFilter, setAccountCodeFilter] = useState<string[]>([]);
+  const [userFilter, setUserFilter] = useState("");
 
   // Fetch data saat pertama kali render
   useEffect(() => {
@@ -19,17 +21,16 @@ const ChurchReport = () => {
       .then((data) => {
         setFinanceList(data);
 
-        // Filter data untuk bulan ini
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth(); // Bulan sekarang (0-11)
-        const currentYear = currentDate.getFullYear(); // Tahun sekarang
+        // Filter data untuk hari ini
+        const today = new Date();
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(today);
+        todayEnd.setHours(23, 59, 59, 999);
 
         const filtered = data.filter((item: any) => {
           const itemDate = new Date(item.date);
-          return (
-            itemDate.getMonth() === currentMonth &&
-            itemDate.getFullYear() === currentYear
-          );
+          return itemDate >= todayStart && itemDate <= todayEnd;
         });
 
         setFilteredFinanceList(filtered); // Menyimpan data bulan ini
@@ -54,6 +55,7 @@ const ChurchReport = () => {
     debit: item.type === "income" ? Math.abs(item.amount) : 0,
     credit: item.type === "spending" ? Math.abs(item.amount) : 0,
     note: item.code,
+    userName: item.userName,
   }));
 
   // Fungsi untuk mengaplikasikan filter berdasarkan tanggal
@@ -69,20 +71,43 @@ const ChurchReport = () => {
       });
     }
 
-    if (accountCodeFilter) {
+    if (accountCodeFilter.length > 0) {
       filtered = filtered.filter((item: any) =>
-        item.code?.toLowerCase().includes(accountCodeFilter.toLowerCase()),
+        accountCodeFilter.some(
+          (code) => code.toLowerCase() === item.code?.toLowerCase(),
+        ),
+      );
+    }
+
+    if (userFilter) {
+      filtered = filtered.filter((item: any) =>
+        item.userName?.toLowerCase().includes(userFilter.toLowerCase()),
       );
     }
 
     setFilteredFinanceList(filtered);
   };
+
+  const filterToday = (data: any[]) => {
+    const today = new Date();
+    return data.filter((item) => {
+      const d = new Date(item.date);
+      return (
+        d.getDate() === today.getDate() &&
+        d.getMonth() === today.getMonth() &&
+        d.getFullYear() === today.getFullYear()
+      );
+    });
+  };
+
   //Reset
   const resetFilter = () => {
     setStartDate("");
     setEndDate("");
-    setAccountCodeFilter("");
-    setFilteredFinanceList(financeList);
+    setAccountCodeFilter([]);
+    setUserFilter("");
+
+    setFilteredFinanceList(filterToday(financeList));
   };
 
   // Menentukan bulan yang ditampilkan pada header
@@ -204,21 +229,31 @@ const ChurchReport = () => {
           />
         </div>
         <div className="space-y-2 text-sm">
+          <label className="block font-bold">Kode Akun</label>
+          <AccountCodeDropdown
+            financeList={financeList}
+            accountCodeFilter={accountCodeFilter}
+            setAccountCodeFilter={setAccountCodeFilter}
+          />
+        </div>
+        <div className="space-y-2 text-sm">
           <label htmlFor="end" className="block font-bold">
-            Kode Akun
+            Nama Admin
           </label>
           <select
-            id="accountCode"
-            value={accountCodeFilter}
-            onChange={(e) => setAccountCodeFilter(e.target.value)}
+            id="userName"
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
             className="border p-2 rounded-md text-sm w-20"
           >
             <option value="">Semua</option>
-            {[...new Set(financeList.map((item) => item.code))].map((code) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
+            {[...new Set(financeList.map((item) => item.userName))].map(
+              (username) => (
+                <option key={username} value={username}>
+                  {username}
+                </option>
+              ),
+            )}
           </select>
         </div>
         <div className="flex p-2 space-x-6 mt-4 text-sm">
@@ -239,6 +274,7 @@ const ChurchReport = () => {
         <Table.Head>
           <Table.HeadCell>No</Table.HeadCell>
           <Table.HeadCell>Tanggal</Table.HeadCell>
+          <Table.HeadCell>Nama Admin</Table.HeadCell>
           <Table.HeadCell>Kode Akun</Table.HeadCell>
           <Table.HeadCell>Keterangan</Table.HeadCell>
           <Table.HeadCell>Debit</Table.HeadCell>
@@ -254,6 +290,7 @@ const ChurchReport = () => {
               <Table.Cell>
                 {new Date(item.date).toLocaleDateString()}
               </Table.Cell>
+              <Table.Cell>{item.userName}</Table.Cell>
               <Table.Cell>{item.code}</Table.Cell>
               <Table.Cell>{item.detail}</Table.Cell>
               <Table.Cell>{item.debit.toLocaleString()}</Table.Cell>
@@ -261,14 +298,14 @@ const ChurchReport = () => {
             </Table.Row>
           ))}
           <Table.Row className="bg-gray-200 font-semibold border-t-2">
-            <Table.Cell colSpan={4} className="text-right">
+            <Table.Cell colSpan={5} className="text-right">
               Jumlah
             </Table.Cell>
             <Table.Cell>{totalDebit.toLocaleString()}</Table.Cell>
             <Table.Cell>{totalCredit.toLocaleString()}</Table.Cell>
           </Table.Row>
           <Table.Row className="bg-gray-200 font-semibold">
-            <Table.Cell colSpan={4} className="text-right">
+            <Table.Cell colSpan={5} className="text-right">
               TOTAL
             </Table.Cell>
             <Table.Cell>{totalFunds.toLocaleString()}</Table.Cell>
